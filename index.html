@@ -15,6 +15,7 @@
     <script src="scripts/new-file.js"></script>
     <script src="scripts/export.mjs"></script>
     <script src="scripts/mergepdf.js"></script>
+    <script src="scripts/schedule-renderer.js"></script>
     <script src="data.js"></script>
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
@@ -198,17 +199,6 @@
             return data
         }
         
-        function dataToSchedule(){
-            data1 = parseStringToMap(backend_process_output[backend_process_output.length - 1])
-            data2 = parseStringToMap(backend_process_output[backend_process_output.length - 2])
-            //.replace(/None/g, 'null').replace(/'/g, '"').replace(/(\{|\,)\s*(\d+)\s*\:/g, '$1"$2":')
-
-            teacher_schedules = populateMap(teacher_schedules,data1,Object.keys(data1));
-            section_schedules = populateMap(section_schedules,data2,Object.keys(data2));
-
-
-        }
-
         function createDropdownPopulator(containerId, searchId, noResultsId, additionalInfoRenderer) {
             return function(dataMap) {
                 const container = document.getElementById(containerId);
@@ -380,70 +370,6 @@
 
         dvar = ""
 
-        function renderSchedules(data) {
-            let html = '';
-            data.forEach((item, id) => {
-
-                if (!id.includes("PecsonSugarolSirilanKeyword")){
-                    html+=`<table style="table-layout:fixed"><colgroup><col width=10%></colgroup><tr><th colspan="6" class="sched_h1">${id}</th></tr><tr class="sched_h2"><td></td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td></tr>`;
-                
-                    var timeslots = [];
-                    for (let i = 0; i < item.entries().next().value[1].size; i++) {
-                        timeslots.push(`<tr class="sched_tr"><td class="timeLabel">00:00-00:00</td>`)
-                    }
-    
-                    item.forEach((day, id) => {
-                        day.forEach((slot, id) => { 
-
-                            try {
-
-                                if (slot.get("Teacher").includes("PecsonSugarolSirilanKeyword")){
-                                    slot.delete("Teacher")
-                                }
-                            } catch (er){
-
-                            }
-
-
-
-
-                            if (slot != "None") {
-                                // ============== Replace this method; in case the actual Name parameter contains a comma ============
-                                //timeslots[id] += `<td>${[...slot].join("\n").replace(/,/g, ": ")}</td>`
-                               
-                                
-                                var slot_entry = "<td style='padding:0.4rem'><table>"
-
-                                
-                                
-                                slot.forEach((tslot, tid) => {
-                                    var str_in = tslot
-                                    slot_entry += '<tr style="padding:0.2rem; border: 0px"><td style="padding:0.2rem;  border: 0px">' + str_in + '</td></tr>'
-                                }) 
-
-                                slot_entry += "</table></td>" 
-                                
-
-
-
-                                timeslots[id] += slot_entry 
-                            }
-                            else{
-                                timeslots[id] += "<td style='padding:0.4rem;'><table style='padding:0.2rem; border: 0px'><tr style='padding:0.2rem; border: 0px'><td style='padding:0.2rem; border: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>Sections</div></td></tr><tr><td style='padding:0rem; border: 0px; margin: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>Sections</div></td></tr></table></td>"
-                                
-                            }
-                        });
-                    });
-    
-                    timeslots.forEach((row) => {
-                        html += row + "</tr>";
-                    });
-                    html += '</table>';
-                }
-            });
-            return html;
-        }
-
         function renderTeacherSchedules(){
             table.innerHTML = renderSchedules()
         }
@@ -493,8 +419,11 @@
                     }
                     else{
                         html += await renderSchedules(section_schedules);
-                        console.log(section_schedules)
                     };
+
+
+
+
                     buttonInteractions.innerHTML = '<button onclick="generate()" id = "generateTimetable">Generate Table</button>'
                     
                     if (has_schedule == true){
@@ -505,6 +434,11 @@
                     break;
             }
             tableContainer.innerHTML = html;
+            
+            if (currentTab == "schedules"){
+                try{post_process()}catch(e){}        
+            }
+
         }
 
         function search() {
