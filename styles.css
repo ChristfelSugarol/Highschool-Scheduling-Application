@@ -1,0 +1,319 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+#menubar {
+    padding-inline: 1rem;
+    background-color: #2d6dd4;
+}
+
+#menubar button {
+    background-color: #2d6dd4;
+}
+
+#menubar button:hover {
+    background-color: #72a0e9;
+}
+
+#navbar {
+    padding: 1rem;
+    background-color: #3b82f6;
+}
+
+#navbar button:hover {
+    background-color: #72a0e9;
+}
+
+#schedulebar {
+    padding-inline: 1rem;
+    background-color: #2d6dd4;
+}
+
+#schedulebar button {
+    background-color: #2d6dd4;
+}
+
+#schedulebar button:hover {
+    background-color: #72a0e9;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+}
+
+nav ul li {
+    margin-right: 1rem;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+main {
+    padding: 1rem;
+}
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #444;
+    padding: 0.5rem;
+    text-align: left;
+}
+th {
+    background-color: #2c2c2c;
+}
+.availability span {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    text-align: center;
+    line-height: 20px;
+    border-radius: 50%;
+}
+.available {
+    background-color: #10b981;
+}
+.unavailable {
+    background-color: #6b7280;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    background-color: #2c2c2c;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+}
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover,
+.close:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+.sched_h1 {
+    text-align: center;
+    font-size: 24px;
+}
+.sched_h2 td {
+    background-color: #333333;
+    text-align: center;
+}
+.sched_tr td {
+    white-space: pre;
+    text-align: center;
+}
+input, select {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    background-color: #3a3a3a;
+    border: 1px solid #555;
+    color: #fff;
+}
+[type="checkbox"] {
+    width: auto;
+}
+button {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #2563eb;
+}
+#addForm {
+    width: 100%;
+}
+fieldset {
+    border-width: 1px 0 0 0;
+    border-color:gray;
+    border-style: solid;
+}
+input[type=checkbox], input[type=radio]{
+    margin-block: 0px;
+    width: auto;
+}
+input[type=number]{
+    width: 50%
+}
+.labelAlign {
+    margin: 0px;
+    border-style: none;
+    display: table;
+    padding-left: 0px
+}
+.labelAlign > li {
+    display: table-row;
+}
+.labelAlign > li > label {
+    display: table-cell;
+    padding-right: 5px;
+}
+.labelAlign > li > input {
+    display: table-cell;
+}
+#availableDays{
+    display: table;
+}
+#availableDays:has(label){
+    display: table-cell;
+}
+input[type=checkbox]{
+    display: table-cell;
+    margin-block: 0px;
+}
+
+#scheduleGrid .active {
+    background-color: #00d238;
+    box-shadow: inset 0 0 10px rgba(0,0,255,0.3);
+}
+
+#scheduleGrid .additional-active {
+    background-color: #00d238;
+    color: white;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+#scheduleGrid .dimmed {
+    background-color: #161616;
+    color: #cccccc;
+    cursor: not-allowed;
+}
+
+#scheduleGrid .clickable-additional {
+    background-color: #ffa500;
+    cursor: pointer;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+#savedState, #structuredSchedule {
+    white-space: pre-wrap;
+    font-family: monospace;
+    color: #f5f5f5;
+    background: #1a1a1a;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.section-search {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+.dropdown-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #1e1e1e;
+}
+
+.dropdown-list label {
+    display: block;
+    padding: 5px;
+    background-color: #2c2c2c;
+    margin-bottom: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #e0e0e0;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-list label:hover {
+    background-color: #3a3a3a;
+}
+
+.dropdown-list label.hidden {
+    display: none;
+}
+
+.dropdown-list input[type="checkbox"] {
+    margin-right: 10px;
+    accent-color: #4a90e2; /* Provides a visible checkbox in dark mode */
+}
+
+.no-results {
+    text-align: center;
+    color: #888;
+    display: none;
+}
+
+.additional-info {
+    font-size: 0.8em;
+    color: #aaa;
+    margin-top: 3px;
+}
+
+.info-group {
+    margin-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.info-tag {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.7em;
+}

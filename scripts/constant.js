@@ -1,0 +1,1 @@
+const LABORATORY_PERIOD = 2

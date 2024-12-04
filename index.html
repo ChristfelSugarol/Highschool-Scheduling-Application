@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System</title>
+    <script src="jquery-3.7.1.min.js" type="text/javascript"></script>
+    <script src="scripts/constant.js"></script>
+    <script src="scripts/generate.js"></script>
+    <script src="scripts/script.js"></script>
+    <script src="scripts/linker.js"></script>
+    <script src="scripts/transferInput.js"></script>
+    <script src="scripts/open-file.js"></script>
+    <script src="scripts/save-file.js"></script>
+    <script src="scripts/new-file.js"></script>
+    <script src="scripts/export.mjs"></script>
+    <script src="scripts/mergepdf.js"></script>
+    <script src="data.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+    <header>
+        <nav id="menubar">
+            <ul>
+                <button onclick="newFile()">New</button>
+                <button onclick="selectFile()">Open</button>
+                <button onclick="saveOnCurrent()">Save</button>
+                <button onclick="saveCustomFile()">Save As...</button>
+                <button>Options</button>
+            </ul>
+            <div id="filenameDisplay">
+                Untitled
+            </div>
+        </nav>
+        <nav id="navbar">
+            <ul>
+                <button onclick="showTab('teachers')">Teachers</button>
+                <button onclick="showTab('subjects')">Subjects</button>
+                <button onclick="showTab('sections')">Sections</button>
+                <button onclick="showTab('laboratories')">Laboratories</button>
+                <button onclick="showTab('schedules')">Schedules</button>
+            </ul>
+            <div>
+                <input type="search" id="searchInput" placeholder="Search...">
+            </div>
+        </nav>
+        <nav id="schedulebar" style="display:none">
+            <ul>
+                <button onclick="{currentSchedule = 'teachers'; renderTable()}">Teachers</button>
+                <button onclick="{currentSchedule = 'sections'; renderTable()}">Sections</button>
+            </ul>
+    </header>
+    <main>
+        <div class="actions">
+            <h1 id="tabTitle">Teachers</h1>
+            <div id="buttonInteractions">
+                <button onclick="addItem()">Add</button>
+                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>
+                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>
+                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>
+            </div>
+        </div>
+        <div id="dataTable">
+            <!-- Table content will be dynamically inserted here -->
+        </div>
+    </main>
+
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Add New Teacher</h2>
+            <form id="addForm">
+                <fieldset>
+                    <div>
+                        Name:
+                        <input type="text" id="name" placeholder="Name" required>
+                    </div>
+                    <div>
+                        ID:
+                        <input type="text" id="id" placeholder="ID" required>
+                    </div>
+                </fieldset>
+                <fieldset id="sectionsBlock">
+                    <legend>Sections</legend>
+                    <div class="search-container">
+                        <input type="text" id="section-search" class="section-search" placeholder="Search sections...">
+                    </div>
+                    <div id="sections" class="dropdown-list">
+                        <!-- Sections will be dynamically populated here -->
+                    </div>
+                    <div id="no-sections-results" class="no-results">No sections found</div>
+                </fieldset>
+            
+                <fieldset id="subjectsBlock">
+                    <legend>Subjects</legend>
+                    <div class="search-container">
+                        <input type="text" id="subject-search" class="section-search" placeholder="Search subjects...">
+                    </div>
+                    <div id="subjects" class="dropdown-list">
+                        <!-- Subjects will be dynamically populated here -->
+                    </div>
+                    <div id="no-subjects-results" class="no-results">No subjects found</div>
+                </fieldset>
+            
+                <fieldset id="teachersBlock">
+                    <legend>Teachers</legend>
+                    <div class="search-container">
+                        <input type="text" id="teacher-search" class="section-search" placeholder="Search teachers...">
+                    </div>
+                    <div id="teachers" class="dropdown-list">
+                        <!-- Teachers will be dynamically populated here -->
+                    </div>
+                    <div id="no-teachers-results" class="no-results">No teachers found</div>
+                </fieldset>
+                <fieldset id="periodInputs">
+                    <legend>Periods</legend>
+                    <ul class="labelAlign">
+                        <li><label for="singlePeriods">Single:</label><input type="number" id="singlePeriods" placeholder="" min="0"></li>
+                        <li><label for="singlePeriods">Double:</label><input type="number" id="doublePeriods" placeholder="" min="0"></li>
+                        <li><label for="singlePeriods">Triple:</label><input type="number" id="triplePeriods" placeholder="" min="0"></li>
+                    </ul>
+                </fieldset>
+                <fieldset id="availableDays">
+                    <legend>Availability</legend>
+                    <div><input type="checkbox" checked="checked" name="mon" id="mon"><label for="mon">Monday</label></div>
+                    <div><input type="checkbox" checked="checked" name="tue" id="tue"><label for="tue">Tuesday</label></div>
+                    <div><input type="checkbox" checked="checked" name="wed" id="wed"><label for="wed">Wednesday</label></div>
+                    <div><input type="checkbox" checked="checked" name="thu" id="thu"><label for="thu">Thursday</label></div>
+                    <div><input type="checkbox" checked="checked" name="fri" id="fri"><label for="fri">Friday</label></div><br>
+                </fieldset>
+                <fieldset id="subjectSpecialField">
+                    <legend>Subject Type</legend>
+                    <div><input type="radio" id="none" name="subjectType" value="none" checked="checked"><label for="none">N/A</label></div>
+                    <div><input type="radio" id="mathsci" name="subjectType" value="mathsci"><label for="mathsci">Math/Science</label></div>
+                    <div><input type="radio" id="lunch" name="subjectType" value="lunch"><label for="lunch">Lunch</label></div><br>
+                </fieldset>
+                <fieldset id="labInputs">
+                    <legend>Laboratories</legend>
+
+                    <select id="laboratories"></select>
+                    <ul class="labelAlign">
+                        <li>
+                            <label for="labPeriods">Laboratory Periods:</label>
+                            <input type="number" id="labPeriods" placeholder="1" min="1" style="display:none">
+                            <input type="text" style="width:50%" id="noLabDisplay" disabled value="N/A">
+                        </li>
+                    </ul>
+                </fieldset>
+                <fieldset id="fixedSchedule">
+                    <legend>Fixed Schedule</legend>
+                    <p></p>
+                    Enable Fixed Schedule? <input type="checkbox" id="enableFixedSched">
+                    <table id="scheduleGrid"></table>
+                    <div id="savedState"></div>
+                    <div id="structuredSchedule"></div>
+                </fieldset>
+                <button type="submit" style="margin-top: 1rem">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        var active_file = ""
+
+        // Why is this here? Because VSC Live Server requires in-line JS due to local file reading to run
+
+        function populateMap (map,object,keys){
+            if (!keys.length) return map
+
+            let key = keys.shift()
+            let value = object[key]
+
+            if (typeof value == 'object' && value != null && !Array.isArray(value)) {
+                value = populateMap(new Map(), value, Object.keys(value))
+            }
+
+            map.set(key, value)
+
+            return populateMap(map,object,keys)
+        }
+
+        let currentTab = 'teachers';
+        let currentSchedule = 'teachers';
+
+        var teachers = populateMap(new Map(),teachersO,Object.keys(teachersO));
+        var subjects = populateMap(new Map(),subjectsO,Object.keys(subjectsO));
+        var sections = populateMap(new Map(),sectionsO,Object.keys(sectionsO));
+        var laboratories = populateMap(new Map(),laboratoriesO,Object.keys(laboratoriesO))       
+        var teacher_schedules = new Map();
+        var section_schedules = new Map();
+
+        function parseStringToMap(data){
+            data = data.replace(/None/g, '"None"')
+            data = data.replace(/'/g, '"')
+            data = data.replace(/(\{|\,)\s*(\d+)\s*\:/g, '$1"$2":')
+            data = JSON.parse(data)
+            
+            return data
+        }
+        
+        function dataToSchedule(){
+            data1 = parseStringToMap(backend_process_output[backend_process_output.length - 1])
+            data2 = parseStringToMap(backend_process_output[backend_process_output.length - 2])
+            //.replace(/None/g, 'null').replace(/'/g, '"').replace(/(\{|\,)\s*(\d+)\s*\:/g, '$1"$2":')
+
+            teacher_schedules = populateMap(teacher_schedules,data1,Object.keys(data1));
+            section_schedules = populateMap(section_schedules,data2,Object.keys(data2));
+
+
+        }
+
+        function createDropdownPopulator(containerId, searchId, noResultsId, additionalInfoRenderer) {
+            return function(dataMap) {
+                const container = document.getElementById(containerId);
+                const searchInput = document.getElementById(searchId);
+                const noResultsMessage = document.getElementById(noResultsId);
+
+                if (!container) {
+                    console.error(`Container with ID ${containerId} not found`);
+                    return;
+                }
+                if (!searchInput) {
+                    console.error(`Search input with ID ${searchId} not found`);
+                    return;
+                }
+                if (!noResultsMessage) {
+                    console.error(`No results message with ID ${noResultsId} not found`);
+                    return;
+                }
+
+                container.innerHTML = '';
+
+                dataMap.forEach((item) => {
+                    const label = document.createElement('label');
+                    const itemName = item.get('name');
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = containerId.slice(0, -1);
+                    checkbox.value = itemName;
+                    
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(itemName));
+                    
+                    if (additionalInfoRenderer) {
+                        const additionalInfo = additionalInfoRenderer(item);
+                        if (additionalInfo) {
+                            label.appendChild(additionalInfo);
+                        }
+                    }
+                    
+                    container.appendChild(label);
+                });
+
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    const labels = container.getElementsByTagName('label');
+                    let matchFound = false;
+                    
+                    Array.from(labels).forEach(label => {
+                        const itemText = label.textContent.toLowerCase();
+                        if (itemText.includes(searchTerm)) {
+                            label.classList.remove('hidden');
+                            matchFound = true;
+                        } else {
+                            label.classList.add('hidden');
+                        }
+                    });
+
+                    noResultsMessage.style.display = matchFound ? 'none' : 'block';
+                });
+            };
+        }
+
+        function renderTeacherInfo(item) {
+            const additionalInfoContainer = document.createElement('div');
+            additionalInfoContainer.classList.add('additional-info');
+
+            if (item.get('subjects')) {
+                const subjectsInfo = document.createElement('div');
+                subjectsInfo.textContent = 'Subjects: ' + item.get('subjects').join(', ');
+                additionalInfoContainer.appendChild(subjectsInfo);
+            }
+
+            return additionalInfoContainer;
+        }
+
+        // Dropdown populator functions, take in a single output parameter, can be seen in the show modals
+        const populateSectionsDropdown = createDropdownPopulator('sections', 'section-search', 'no-sections-results');
+        const populateSubjectsDropdown = createDropdownPopulator('subjects', 'subject-search', 'no-subjects-results');
+        const populateTeachersDropdown = createDropdownPopulator('teachers', 'teacher-search', 'no-teachers-results', renderTeacherInfo);
+
+        function populateLaboratoriesDropdown(){
+            const labDropdown = document.getElementById('laboratories');
+            labDropdown.innerHTML = '';
+
+            const noLab = document.createElement('option');
+            noLab.value = "none";
+            noLab.textContent = "None";
+            labDropdown.appendChild(noLab);
+
+            laboratories.forEach((lab) => {
+                const option = document.createElement('option');
+                option.value = lab.get("name");
+                option.textContent = lab.get("name");
+                labDropdown.appendChild(option);
+            })
+        }
+
+        function showTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabTitle').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
+            renderTable();
+        }
+
+        function newRow(item, id, index) {
+            return `<tr><td style="width: 1%; white-space:nowrap"><div style="display:flex;" ><div class="entry_number">${index}</div><div><button style="display: None" class="entry_button">Edit</button></div><div></td><td>${id}</td><td>${item.get("name")}</td>`;
+        }
+
+        function renderTeachers(data) {
+            let index = 1;
+            let html = ''
+            data.forEach((item, id) => {
+                html += newRow(item, id, index++) + `<td>${item.get("subjects").join(', ')}</td><td class="availability">`;
+                const availability = item.get("availability");
+                ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
+                    html += `<span class="${availability.get(day) ? 'available' : 'unavailable'}">${day[0].toUpperCase()}</span>`;
+                });
+                html += '</td></tr>';
+            })
+            return html
+        }
+
+        function renderSubjects(data) {
+            let index = 1;
+            let html = ''
+            data.forEach((item, id) => {
+                const periods = item.get("periods");
+                let type = ""
+                if (item.get("isMathSci") == true){
+                    type = "Math/Science";
+                } else if (item.get("break") != null){
+                    type = "Lunch Break";
+                }
+
+                let laboratory = ""
+                if (item.get("laboratory") != null){
+                    laboratory = `${item.get("laboratory").get("room")}`
+                }
+
+                html += newRow(item, id, index++) + `<td>${item.get("teachers").join(', ')}</td><td>${item.get("section")}</td><td>${type}</td><td>${laboratory}</td><td>S: ${periods.get("single")}, D: ${periods.get("double")}, T: ${periods.get("triple")}</td><td class="availability">`;
+                const availability = item.get("availability");
+                ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
+                    html += `<span class="${availability.get(day) ? 'available' : 'unavailable'}">${day[0].toUpperCase()}</span>`;
+                });
+            })
+            html += '</td></tr>';
+            return html
+        }
+
+        function renderLaboratories(data) {
+            let index = 1;
+            let html = '';
+            data.forEach((item, id) => {
+                html += newRow(item, id, index++) + `<td>${item.get("subjects")}</td>`;
+            });
+            html += '</tr>';
+            return html
+        }
+
+        function renderSections(data) {
+            let index = 1;
+            let html = '';
+            data.forEach((item, id) => {
+                html += newRow(item,id,index++) + `<td>${item.get("subjects").join(': ')}</td>`;
+            });
+            html += '</tr>';
+            return html
+        }
+
+        dvar = ""
+
+        function renderSchedules(data) {
+            let html = '';
+            data.forEach((item, id) => {
+
+                if (!id.includes("PecsonSugarolSirilanKeyword")){
+                    html+=`<table style="table-layout:fixed"><colgroup><col width=10%></colgroup><tr><th colspan="6" class="sched_h1">${id}</th></tr><tr class="sched_h2"><td></td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td></tr>`;
+                
+                    var timeslots = [];
+                    for (let i = 0; i < item.entries().next().value[1].size; i++) {
+                        timeslots.push(`<tr class="sched_tr"><td class="timeLabel">00:00-00:00</td>`)
+                    }
+    
+                    item.forEach((day, id) => {
+                        day.forEach((slot, id) => { 
+
+                            try {
+
+                                if (slot.get("Teacher").includes("PecsonSugarolSirilanKeyword")){
+                                    slot.delete("Teacher")
+                                }
+                            } catch (er){
+
+                            }
+
+
+
+
+                            if (slot != "None") {
+                                // ============== Replace this method; in case the actual Name parameter contains a comma ============
+                                //timeslots[id] += `<td>${[...slot].join("\n").replace(/,/g, ": ")}</td>`
+                               
+                                
+                                var slot_entry = "<td style='padding:0.4rem'><table>"
+
+                                
+                                
+                                slot.forEach((tslot, tid) => {
+                                    var str_in = tslot
+                                    slot_entry += '<tr style="padding:0.2rem; border: 0px"><td style="padding:0.2rem;  border: 0px">' + str_in + '</td></tr>'
+                                }) 
+
+                                slot_entry += "</table></td>" 
+                                
+
+
+
+                                timeslots[id] += slot_entry 
+                            }
+                            else{
+                                timeslots[id] += "<td style='padding:0.4rem;'><table style='padding:0.2rem; border: 0px'><tr style='padding:0.2rem; border: 0px'><td style='padding:0.2rem; border: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>Sections</div></td></tr><tr><td style='padding:0rem; border: 0px; margin: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>Sections</div></td></tr></table></td>"
+                                
+                            }
+                        });
+                    });
+    
+                    timeslots.forEach((row) => {
+                        html += row + "</tr>";
+                    });
+                    html += '</table>';
+                }
+            });
+            return html;
+        }
+
+        function renderTeacherSchedules(){
+            table.innerHTML = renderSchedules()
+        }
+
+        function renderSectionSchedules(){
+
+        }
+
+        async function renderTable() {        // Contains headers and render calls
+            const tableContainer = document.getElementById('dataTable');
+            let html = '';
+            let buttonInteractions = document.getElementById('buttonInteractions')
+
+            switch(currentTab) {
+                case 'teachers':
+                    document.getElementById('schedulebar').style.display = "none"
+                    html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th><th>Availability</th></tr>';
+                    html += await renderTeachers(teachers) + '</table>';
+                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    break;
+
+                case 'subjects':
+                    document.getElementById('schedulebar').style.display = "none"
+                    html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Teachers</th><th>Section</th><th>Type</th><th>Laboratory</th><th>Periods</th><th>Availability</th></tr>';
+                    html +=  await renderSubjects(subjects) + '</table>';
+                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    break;
+
+                case 'laboratories':
+                    document.getElementById('schedulebar').style.display = "none"
+                    html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th></tr>';
+                    html += await renderLaboratories(laboratories) + '</table>';
+                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    break;
+
+                case 'sections':
+                    document.getElementById('schedulebar').style.display = "none"
+                    html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th></tr>';
+                    html += await renderSections(sections) + '</table>';
+                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    break;
+
+                case 'schedules':
+                    document.getElementById('schedulebar').style.display = "flex"
+                    if (currentSchedule == "teachers"){
+                        html += await renderSchedules(teacher_schedules);
+                    }
+                    else{
+                        html += await renderSchedules(section_schedules);
+                        console.log(section_schedules)
+                    };
+                    buttonInteractions.innerHTML = '<button onclick="generate()" id = "generateTimetable">Generate Table</button>'
+                    
+                    if (has_schedule == true){
+                        buttonInteractions.innerHTML = '<button onclick="export_pdf()" id = "export_button" style="margin: 2px;">Export</button>' + buttonInteractions.innerHTML
+                        buttonInteractions.innerHTML = '<button onclick="clear_schedule()" id = "clear_export_btn">Clear</button>' + buttonInteractions.innerHTML
+                    } 
+
+                    break;
+            }
+            tableContainer.innerHTML = html;
+        }
+
+        function search() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let data;
+            switch(currentTab) {
+                case 'teachers': data = teachers; break;
+                case 'subjects': data = subjects; break;
+                case 'sections': data = sections; break;
+                case 'laboratories': data = laboratories; break;
+            }
+            const filteredData = Array.from(data.values()).filter(item => 
+                item.get("name").toLowerCase().includes(searchTerm) ||
+                (item.subjects && item.subjects.some(subj => subj.toLowerCase().includes(searchTerm))) ||
+                (item.teachers && item.teachers.some(teacher => teacher.toLowerCase().includes(searchTerm)))
+            );
+            renderFilteredTable(filteredData);
+        }
+
+        function renderFilteredTable(data) {
+            const table = document.getElementById('dataTable');
+            let html = table.rows[0].outerHTML;  // Keep the header row
+
+            let index = 1; // Initialize index for displaying row numbers
+            data.forEach((item, id) => {
+                html += '<tr>';
+                html += `<td>${index++}</td><td>${id}</td><td>${item.name}</td>`;
+                
+                if (currentTab === 'teachers') {
+                    html += `<td>${item.subjects.join(', ')}</td>`;
+                    html += '<td class="availability">';
+                    ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
+                        html += `<span class="${item.availability[day] ? 'available' : 'unavailable'}">${day[0].toUpperCase()}</span>`;
+                    });
+                    html += '</td>';
+                } else if (currentTab === 'subjects') {
+                    html += `<td>${item.teachers.join(', ')}</td><td>${item.section}</td>`;
+                    html += `<td>S: ${item.periods.single}, D: ${item.periods.double}, T: ${item.periods.triple}</td>`;
+                    ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
+                        html += `<span class="${item.availability[day] ? 'available' : 'unavailable'}">${day[0].toUpperCase()}</span>`;
+                    });
+                } else {
+                    html += `<td>${item.subjects.join(', ')}</td>`;
+                }
+                
+                html += '</tr>';
+            });
+
+            table.innerHTML = html;
+        }
+     
+        function showModal() {
+            console.log("This")
+            const modal = document.getElementById('addModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const availableDays = document.getElementById('availableDays');
+            const periodInputs = document.getElementById('periodInputs');
+            const subjectInputs = document.getElementById('subjectsBlock');
+            const teacherInputs = document.getElementById('teachersBlock');
+            const sectionInputs = document.getElementById('sectionsBlock');
+            const subjectProperties = document.getElementById('subjectSpecialField');
+            const labInputs = document.getElementById('labInputs')
+            const scheduleInputs = document.getElementById('fixedSchedule');
+            const teacherSchedText = document.getElementById('teacherSchedText');
+
+            switch(currentTab) {
+                case 'teachers':
+                    modalTitle.textContent = 'Add New Teacher';
+
+                    subjectInputs.style.display = 'block';
+                    availableDays.style.display = 'block';
+                    periodInputs.style.display = 'none';
+                    teacherInputs.style.display = 'none';
+                    sectionInputs.style.display = 'none';
+                    subjectProperties.style.display = 'none';
+                    labInputs.style.display = 'none';      
+                    scheduleInputs.style.display = 'block';      
+
+                    populateSubjectsDropdown(subjects);
+                    break;
+                case 'subjects':
+                    modalTitle.textContent = 'Add New Subject';
+
+                    subjectInputs.style.display = 'none';
+                    availableDays.style.display = 'block';
+                    periodInputs.style.display = 'block'; 
+                    teacherInputs.style.display = 'block';
+                    sectionInputs.style.display = 'block';
+                    subjectProperties.style.display = 'block';
+                    labInputs.style.display = 'block'; 
+                    scheduleInputs.style.display = 'block';      
+
+                    populateTeachersDropdown(teachers);
+                    populateSubjectsDropdown(subjects);
+                    populateSectionsDropdown(sections);
+                    populateLaboratoriesDropdown();
+                    break;
+                case 'sections':
+                    modalTitle.textContent = 'Add New Section';
+
+                    subjectInputs.style.display = 'block';
+                    availableDays.style.display = 'none';
+                    periodInputs.style.display = 'none';
+                    teacherInputs.style.display = 'none';
+                    sectionInputs.style.display = 'none';
+                    subjectProperties.style.display = 'none';
+                    labInputs.style.display = 'none'; 
+                    scheduleInputs.style.display = 'none';      
+
+                    populateSubjectsDropdown(subjects);
+                    break;
+                case 'laboratories':
+                    modalTitle.textContent = 'Add New Laboratory';
+
+                    subjectInputs.style.display = 'none';
+                    availableDays.style.display = 'none';
+                    periodInputs.style.display = 'none';
+                    teacherInputs.style.display = 'none';
+                    sectionInputs.style.display = 'none';
+                    subjectProperties.style.display = 'none';
+                    labInputs.style.display = 'none';
+                    scheduleInputs.style.display = 'none';      
+
+                    break; 
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+
+        // Fixed Schedule Logic Starts Here
+        const tableState = {
+            rows: 15,
+            cols: 5,
+            primaryActiveCells: new Set(),
+            additionalActiveCells: new Set()
+        };
+        const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+        // Utility Functions
+        function clearColumnCells(col) {
+            // Remove primary and additional cells for specific column
+            tableState.primaryActiveCells = new Set(
+                Array.from(tableState.primaryActiveCells)
+                    .filter(cellId => !cellId.endsWith(`-${col}`))
+            );
+            
+            tableState.additionalActiveCells = new Set(
+                Array.from(tableState.additionalActiveCells)
+                    .filter(cellId => !cellId.endsWith(`-${col}`))
+            );
+        }
+
+        function findPrimaryCell(col) {
+            for (const cellId of tableState.primaryActiveCells) {
+                const [, cellCol] = cellId.split('-').map(Number);
+                if (cellCol === col) return cellId;
+            }
+            return null;
+        }
+
+        function getCellClass(cellId, col) {
+            const [row] = cellId.split('-').map(Number);
+            const primaryCellId = findPrimaryCell(col);
+
+            // Primary cell handling
+            if (tableState.primaryActiveCells.has(cellId)) return 'active';
+            
+            // Additional cell handling
+            if (tableState.additionalActiveCells.has(cellId)) return 'additional-active';
+            
+            if (primaryCellId) {
+                const [primaryRow] = primaryCellId.split('-').map(Number);
+                
+                // Dimming logic
+                if (row < primaryRow) return 'dimmed';
+                if (row > primaryRow + 2) return 'dimmed';
+                
+                // Clickable additional cells logic
+                const additionalCells = Array.from(tableState.additionalActiveCells)
+                    .filter(id => id.startsWith(`${primaryRow + 1}-${col}`))
+                    .sort();
+                
+                // First additional cell row
+                if (row === primaryRow + 1 && additionalCells.length === 0) {
+                    return 'clickable-additional';
+                }
+                
+                // Second additional cell row
+                if (row === primaryRow + 2 && additionalCells.length === 1) {
+                    return 'clickable-additional';
+                }
+            }
+
+            return '';
+        }
+
+        function updateColumnStyles(col) {
+            document.querySelectorAll(`[data-id*="-${col}"]`).forEach(cell => {
+                cell.className = getCellClass(cell.dataset.id, col) || '';
+            });
+        }
+
+        function displaySavedState() {
+            const stateDiv = document.getElementById('savedState');
+            const displayState = {
+                ...tableState,
+                primaryActiveCells: Array.from(tableState.primaryActiveCells),
+                additionalActiveCells: Array.from(tableState.additionalActiveCells)
+            };
+            stateDiv.textContent = JSON.stringify(displayState, null, 2);
+
+            const structuredSchedule = generateStructuredSchedule();
+            document.getElementById('structuredSchedule').textContent = JSON.stringify(structuredSchedule, null, 2);
+        }
+
+        function generateStructuredSchedule() {
+            const definiteSchedule = {
+                "mon": { "start": null, "duration": null },
+                "tue": { "start": null, "duration": null },
+                "wed": { "start": null, "duration": null },
+                "thu": { "start": null, "duration": null },
+                "fri": { "start": null, "duration": null }
+            };
+
+            // Iterate through each column (day)
+            for (let col = 0; col < tableState.cols; col++) {
+                const primaryCellId = findPrimaryCell(col);
+                
+                if (primaryCellId) {
+                    const [primaryRow] = primaryCellId.split('-').map(Number);
+                    const additionalCells = Array.from(tableState.additionalActiveCells)
+                        .filter(id => id.startsWith(`${primaryRow + 1}-${col}`))
+                        .sort();
+
+                    const key = ['mon', 'tue', 'wed', 'thu', 'fri'][col];
+                    
+                    // Start time is the primary cell's row number (assuming row 0 is 9:00 AM)
+                    definiteSchedule[key].start = primaryRow;
+                    
+                    // Duration calculation
+                    const duration = additionalCells.length > 0 ? 3 : 1;
+                    definiteSchedule[key].duration = duration;
+                }
+            }
+
+            return { definite_schedule: definiteSchedule };
+        }
+
+
+        function toggleCell(cellId) {
+            const [row, col] = cellId.split('-').map(Number);
+            const primaryCellId = findPrimaryCell(col);
+
+            // If clicking the current primary cell again, remove it (removal)
+            if (primaryCellId === cellId) {
+                tableState.primaryActiveCells.delete(cellId);
+                // And remove all additional cells in this column
+                tableState.additionalActiveCells = new Set(
+                    Array.from(tableState.additionalActiveCells)
+                        .filter(id => !id.endsWith(`-${col}`))
+                );
+                updateColumnStyles(col);
+                displaySavedState();
+                return;
+            }
+
+            // primary cell selection logic
+            if (!primaryCellId) {
+                // first cell clicked in column is primary
+                tableState.primaryActiveCells.add(cellId);
+                updateColumnStyles(col);
+                displaySavedState();
+                return;
+            }
+
+            // additional cells
+            const [primaryRow] = primaryCellId.split('-').map(Number);
+            // constrain the additional cells to be within 2 rows of the primary cell 
+            const isValidAdditional = 
+                row > primaryRow && 
+                row <= primaryRow + 2;
+
+            if (isValidAdditional) {
+                const additionalCells = Array.from(tableState.additionalActiveCells)
+                    .filter(id => id.startsWith(`${primaryRow + 1}-${col}`))
+                    .sort();
+
+                // toggle additional cell
+                if (tableState.additionalActiveCells.has(cellId)) {
+                    tableState.additionalActiveCells.delete(cellId);
+                    
+                    // If removing the first additional cell, also remove the second additional cell
+                    if (cellId.startsWith(`${primaryRow + 1}-${col}`)) {
+                        const secondAdditionalCell = Array.from(tableState.additionalActiveCells)
+                            .find(id => id.startsWith(`${primaryRow + 2}-${col}`));
+                        
+                        if (secondAdditionalCell) {
+                            tableState.additionalActiveCells.delete(secondAdditionalCell);
+                        }
+                    }
+                    
+                    updateColumnStyles(col);
+                    displaySavedState();
+                    return;
+                }
+
+                // 1st additional cell logic
+                if (row === primaryRow + 1 && additionalCells.length === 0) {
+                    tableState.additionalActiveCells.add(cellId);
+                    updateColumnStyles(col);
+                    displaySavedState();
+                    return;
+                }
+
+                // 2nd additional cell logic (if 1st cell is already selected)
+                if (row === primaryRow + 2 && additionalCells.length === 1) {
+                    tableState.additionalActiveCells.add(cellId);
+                    updateColumnStyles(col);
+                    displaySavedState();
+                    return;
+                }
+            }
+        }
+
+        function createTable() {
+            const table = document.getElementById('scheduleGrid');
+            table.innerHTML = `
+                <thead>
+                    <tr>${weekdays.map(day => `<th>${day}</th>`).join('')}</tr>
+                </thead>
+                <tbody>
+                    ${Array.from({length: tableState.rows - 1}, (_, i) => 
+                        `<tr>
+                            ${Array.from({length: tableState.cols}, (_, j) => {
+                                const cellId = `${i}-${j}`;
+                                return `<td data-id="${cellId}" onclick="toggleCell('${cellId}')">${cellId}</td>`;
+                            }).join('')}
+                        </tr>`
+                    ).join('')}
+                </tbody>
+            `;
+        }
+
+        // Initialization of fixedschedule table
+        createTable();
+        // code below is for debugging, COMMENT OUT WHEN DONE
+        displaySavedState();
+
+        // Submits the data from the add form to the database; also includes the map constructor
+
+        var activeButton = ""
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function interaction(user_in) {
+            const entry_buttons = document.getElementsByClassName('entry_button');
+            const entry_nums = document.getElementsByClassName('entry_number');
+
+            if (activeButton === user_in) {
+                document.getElementById(user_in).style.backgroundColor = "#3b82f6";
+                activeButton = "";
+
+                for (let i = 0; i < entry_buttons.length; i++) {
+                    entry_buttons[i].style.display = "none";
+                    entry_nums[i].style.display = "block";
+                }
+            } else {
+                if (activeButton) {
+                    document.getElementById(activeButton).style.backgroundColor = "#3b82f6";
+                }
+
+                document.getElementById(user_in).style.backgroundColor = "red";
+                activeButton = user_in;
+
+                for (let i = 0; i < entry_buttons.length; i++) {
+                    entry_nums[i].style.display = "none";
+                    entry_buttons[i].style.display = "block";
+                    const actionType = capitalizeFirstLetter(user_in.replace("_button", ""));
+                    entry_buttons[i].textContent = actionType;
+                    entry_buttons[i].setAttribute("onClick", `button_interaction(this, '${actionType}')`);
+                }
+            }
+        }
+
+        function button_interaction(elem, type){
+            const tr = elem.closest('tr'); 
+            const id = tr.children[1].textContent; 
+
+            if (type === 'Edit') {
+                editItem(id); 
+            } else if (type === 'Remove') {
+                removeItem(id); 
+            }
+        }
+
+        function constructItem() {
+            const name = document.getElementById('name').value;
+            const id = document.getElementById('id').value;
+            const selectedTeachers = Array.from(document.querySelectorAll('#teachers input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
+            const selectedSection = Array.from(document.querySelectorAll('#sections input[type="checkbox"]:checked')).map(checkbox => checkbox.value); // Get selected sections
+            const selectedSubjects = Array.from(document.querySelectorAll('#subjects input[type="checkbox"]:checked')).map(checkbox => checkbox.value); // Get selected subjects
+            
+            console.log(selectedSubjects)
+
+            let newItem;
+            switch(currentTab) {
+                case 'subjects':
+                    var checkBox = document.getElementById("enableFixedSched");
+                    const subjectType = document.querySelector('input[name="subjectType"]:checked').value
+                    const labValue = document.getElementById('laboratories').value
+                    newItem = { 
+                        "has_definite_schedule": checkBox.checked,
+                        "has_teacher": selectedTeachers.length == true || false,
+                        "laboratory": (labValue == 'none')? null: {
+                            "room": labValue,
+                            "periods": parseInt(document.getElementById('labPeriods').value) || 0
+                        },
+                        "break": (subjectType == 'lunch')? "Lunch": null,
+                        "isMathSci": (subjectType == 'mathsci')? true: false,
+
+                        "name": name, 
+                        "teachers": selectedTeachers, 
+                        "section": selectedSection,  // Store the selected section
+                        "periods": {
+                            "single": parseInt(document.getElementById('singlePeriods').value) || 0,
+                            "double": parseInt(document.getElementById('doublePeriods').value) || 0,
+                            "triple": parseInt(document.getElementById('triplePeriods').value) || 0
+                        },
+                        "availability": {
+                            "mon": document.querySelector('input[name="mon"]').checked,
+                            "tue": document.querySelector('input[name="tue"]').checked,
+                            "wed": document.querySelector('input[name="wed"]').checked,
+                            "thu": document.querySelector('input[name="thu"]').checked,
+                            "fri": document.querySelector('input[name="fri"]').checked
+                        },
+                        "definite_schedule": generateStructuredSchedule().definite_schedule
+                    };
+                    subjects.set(id, populateMap(new Map(), newItem, Object.keys(newItem))); // Use Map's set method
+                    break;
+
+                case 'teachers':
+                    newItem = { 
+                        "name": name, 
+                        "subjects": selectedSubjects,  // Assuming teachers can have subjects (you might want to adjust this)
+                        "availability": { 
+                            "mon": document.querySelector('input[name="mon"]').checked,
+                            "tue": document.querySelector('input[name="tue"]').checked,
+                            "wed": document.querySelector('input[name="wed"]').checked,
+                            "thu": document.querySelector('input[name="thu"]').checked,
+                            "fri": document.querySelector('input[name="fri"]').checked
+                        },
+                        "definite_schedule": generateStructuredSchedule().definite_schedule
+                    };
+                    teachers.set(id, populateMap(new Map(), newItem, Object.keys(newItem))); // Use Map's set method
+                    break;
+
+                case 'sections':
+                    newItem = { 
+                        "name": name, 
+                        "subjects": selectedSubjects // Assuming sections can reference subjects
+                    };
+                    sections.set(id, populateMap(new Map(), newItem, Object.keys(newItem))); // Use Map's set method
+                    break;
+                
+                case 'laboratories':
+                    newItem = {
+                        "name": name,
+                    }
+                    laboratories.set(id, populateMap(new Map(), newItem, Object,keys(newItem)));
+                    break;
+                // You can add cases for 'classrooms' similarly if needed
+            }
+        }
+
+        function addItem() {
+            showModal();
+
+            // Reset input field
+            document.getElementById("name").value = "";
+            document.getElementById("id").value = "";
+            if (currentTab === 'subjects') {
+                document.getElementById('singlePeriods').value = "";
+                document.getElementById('doublePeriods').value = "";
+                document.getElementById('triplePeriods').value = "";
+                document.getElementById('laboratories').value = "none";
+                document.getElementById('labPeriods').value = 1;
+            }
+
+            document.getElementById('addForm').onsubmit = function (e) {
+                e.preventDefault();
+                constructItem();
+                const item = getCurrentTabData().get(document.getElementById("id").value)
+                updateAddData(item);
+                closeModal();
+                renderTable();
+            };
+        }
+
+        function updateAddData(thingy){ 
+            switch (currentTab){
+                case 'teachers':
+                    subjects.forEach(item => {
+                        if (thingy.get("subjects").includes(item.get("name"))){
+                            item.get("teachers").push(thingy.get("name"))
+                            item.set("has_teacher", true)
+                        }
+                    });
+                    break;
+                case 'sections':
+                    subjects.forEach(item => {
+                        if (thingy.get("subjects").includes(item.get("name"))){
+                            item.get("section").push(thingy.get("name"))
+                        }
+                    });
+                    break;
+                case 'subjects':
+                    if (thingy.get("laboratory") != null){
+                        laboratories.forEach((item) => {
+                            if (thingy.get("laboratory").get("room") == item.get("name")){
+                                item.get("subjects").push(thingy.get("name"))
+                            }
+                        });
+                    };
+                    teachers.forEach(item => {
+                        if (thingy.get("teachers").includes(item.get("name"))){
+                            item.get("subjects").push(thingy.get("name"))
+                        }
+                    });
+                    sections.forEach(item => {
+                        if (thingy.get("section").includes(item.get("name"))){
+                            item.get("subjects").push(thingy.get("name"))
+                        }
+                    });
+                    break;
+            }
+        }
+
+        function editItem(id) {
+            const modal = document.getElementById('addModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const item = getCurrentTabData().get(id); // Fetch item based on the current tab
+
+            // Populate modal fields with item data
+            document.getElementById('name').value = item.get("name");
+            document.getElementById('id').value = id;
+
+            if (currentTab === 'subjects') {
+                document.getElementById('singlePeriods').value = item.get("periods").get("single") || 0;
+                document.getElementById('doublePeriods').value = item.get("periods").get("double") || 0;
+                document.getElementById('triplePeriods').value = item.get("periods").get("triple") || 0;
+            }
+
+            
+
+            // Show the modal
+            showModal();
+            // Change modal title
+            switch(currentTab){
+                case 'laboratories': {modalTitle.textContent = `Edit Laboratory`; break;}
+                default: modalTitle.textContent = `Edit ${capitalizeFirstLetter(currentTab.slice(0, -1))}`;
+            }
+            
+
+            // Set submit behavior to update existing item
+            document.getElementById('addForm').onsubmit = function (e) {
+                e.preventDefault();
+                console.log(document.getElementById("name"))
+                updateItem(id); // Update item on submission
+                
+            };
+        }
+
+        function updateItem(id) {
+            const data = getCurrentTabData()
+            const oldname = data.get(id).get("name");
+            const newid = document.getElementById('id').value;
+
+            constructItem();
+
+            let item = data.get(newid); // Fetch the item
+            // If the id gets changed, clones old item to new id and deletes old item
+            if (id != newid){
+                data.delete(id)
+            }
+
+            updateEditData(item.get("name"), oldname);
+            closeModal();
+            renderTable();
+            console.log(getCurrentTabData())
+        }
+
+        function updateEditData(name, oldname) {
+            switch (currentTab){
+                case 'teachers':
+                    subjects.forEach(item => {
+                        const index = item.get('teachers').indexOf(oldname)
+                        if (~index) {
+                            item.get('teachers')[index] = name
+                        }
+                    });
+                    break;
+                case 'sections':
+                    subjects.forEach(item => {
+                        const index = item.get('section').indexOf(oldname)
+                        if (~index) {
+                            item.get('section')[index] = name
+                        }
+                    });
+                    break;
+                case 'subjects':
+                    laboratories.forEach(item => {
+                        const index = item.get('subjects').indexOf(oldname)
+                        if (~index) {
+                            item.get('subjects')[index] = name
+                        }
+                    });
+                    teachers.forEach(item => {
+                        const index = item.get('subjects').indexOf(oldname)
+                        if (~index) {
+                            item.get('subjects')[index] = name
+                        }
+                    });
+                    sections.forEach(item => {
+                        const index = item.get('subjects').indexOf(oldname)
+                        if (~index) {
+                            item.get('subjects')[index] = name
+                        }
+                    });
+                    break;
+                case 'laboratories':
+                    subjects.forEach(item => {
+                        if (item.get('laboratory').get('room') == oldname) {
+                            item.get('laboratory').set('room', name)
+                        }
+                    });
+                    break;
+            }
+        }
+
+        function removeItem(id) {
+            const name = getCurrentTabData().get(id).get("name")
+            getCurrentTabData().delete(id); // Delete item from the current tab's data
+            updateRemoveData(name)
+            renderTable(); // Re-render the table
+        }
+
+        function updateRemoveData(name){
+            switch (currentTab){
+                case 'teachers':
+                    subjects.forEach(item => {
+                        const index = item.get('teachers').indexOf(name)
+                        if (~index) {
+                            item.get('teachers').splice(index, 1)
+                            if (item.get('teachers').length == 0){
+                                item.set('has_teacher', false)
+                            }
+                        }
+                    });
+                    break;
+                case 'sections':
+                    subjects.forEach(item => {
+                        const index = item.get('section').indexOf(name)
+                        if (~index) {
+                            item.get('section').splice(index, 1)
+                        }
+                    });
+                    break;
+                case 'subjects':
+                    laboratories.forEach(item => {
+                        const index = item.get('subjects').indexOf(name)
+                        if (~index) {
+                            item.get('subjects').splice(index, 1)
+                        }
+                    });
+                    teachers.forEach(item => {
+                        const index = item.get('subjects').indexOf(name)
+                        if (~index) {
+                            item.get('subjects').splice(index, 1)
+                        }
+                    });
+                    sections.forEach(item => {
+                        const index = item.get('subjects').indexOf(name)
+                        if (~index) {
+                            item.get('subjects').splice(index, 1)
+                        }
+                    });
+                    break;
+                case 'laboratories':
+                    subjects.forEach(item => {
+                        if (item.get('laboratory').get('room') == name) {
+                            item.set('laboratory', null)
+                        }
+                    });
+                    break;
+            }
+        }
+
+        function getCurrentTabData() {
+            switch (currentTab) {
+                case 'teachers': return teachers;
+                case 'subjects': return subjects;
+                case 'sections': return sections;
+                case 'laboratories': return laboratories;
+            }
+        }
+
+        // Allow multiple selection of Options without holding ctrl or shift
+        window.onmousedown = function (e) {
+            var el = e.target;
+            if (el.tagName.toLowerCase() == 'option' && el.parentNode.hasAttribute('multiple')) {
+                e.preventDefault();
+        
+                // toggle selection
+                if (el.hasAttribute('selected')) el.removeAttribute('selected');
+                else el.setAttribute('selected', '');
+        
+                // hack to correct buggy behavior
+                var select = el.parentNode.cloneNode(true);
+                el.parentNode.parentNode.replaceChild(select, el.parentNode);
+            }
+        }
+
+        // Disables Laboratory Period selection based on current lab selected
+
+        /*$(function(){
+            $("#laboratories").change(function(){
+                if ($("#laboratories").val() == 'none'){
+                    document.getElementById('labPeriods').style.display = 'none';
+                    document.getElementById('noLabDisplay').style.display = 'inline-block';
+                }
+                else {
+                    document.getElementById('labPeriods').style.display = 'inline-block';
+                    document.getElementById('noLabDisplay').style.display = 'none';
+                }
+            })
+        })*/
+
+        /*$(document).ready(function(){
+            $("#laboratories").on("change", function(){
+            if ($("#laboratories").val() == 'none'){
+                document.getElementById('labPeriods').style.display = 'none';
+                document.getElementById('noLabDisplay').style.display = 'inline-block';
+            }
+            else {
+                document.getElementById('labPeriods').style.display = 'inline-block';
+                document.getElementById('noLabDisplay').style.display = 'none';
+            }
+                console.log("yes")
+        })
+        })*/
+
+    renderTable()
+    </script>
+</body>
+</html>
