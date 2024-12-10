@@ -6,6 +6,21 @@ const util = require('util');
 const execPromise = util.promisify(exec);
 const fs = require('fs');
 
+function stringToMap(str) {
+    const obj = JSON.parse(str);
+    return new Map(Object.entries(obj).map(([key, value]) => [key, deserializeMapValue(value)]));
+  }
+  
+  function deserializeMapValue(value) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return new Map(Object.entries(value).map(([k, v]) => [k, deserializeMapValue(v)]));
+    } else if (Array.isArray(value)) {
+      return value.map(item => deserializeMapValue(item));
+    } else {
+      return value;
+    }
+}
+
 function replaceFirstLast(text, newFirst, newLast) {
     if (text.length < 2) {
         return text;
@@ -121,10 +136,10 @@ async function selectFile() {
                     subjectsO = data.subjectsO
                     laboratoriesO = data.laboratoriesO
 
-                    teachers = populateMap(new Map(),teachersO,Object.keys(teachersO));
-                    subjects = populateMap(new Map(),subjectsO,Object.keys(subjectsO));
-                    sections = populateMap(new Map(),sectionsO,Object.keys(sectionsO));
-                    laboratories = populateMap(new Map(),laboratoriesO,Object.keys(laboratoriesO))       
+                    teachers = stringToMap(teachersO)
+                    subjects = stringToMap(subjectsO)
+                    sections = stringToMap(sectionsO)
+                    laboratories = stringToMap(laboratoriesO)       
                     schedules = new Map();
                     renderTable()
 

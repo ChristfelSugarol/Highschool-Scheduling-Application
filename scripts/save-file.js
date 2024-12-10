@@ -1,9 +1,29 @@
+function mapToString(map) {
+    return JSON.stringify(Array.from(map).reduce((obj, [key, value]) => {
+      obj[key] = serializeMapValue(value);
+      return obj;
+    }, {}));
+  }
+  
+  function serializeMapValue(value) {
+    if (value instanceof Map) {
+      return Array.from(value).reduce((obj, [k, v]) => {
+        obj[k] = serializeMapValue(v);
+        return obj;
+      }, {});
+    } else if (Array.isArray(value)) {
+      return value.map(item => serializeMapValue(item));
+    } else {
+      return value;
+    }
+}
+
 function exportedfile() {
     ef = {
-        "teachersO":teachersO,
-        "subjectsO":subjectsO,
-        "sectionsO":sectionsO,
-        "laboratoriesO":laboratoriesO
+        "teachersO":mapToString(teachers),
+        "subjectsO":mapToString(subjects),
+        "sectionsO":mapToString(sections),
+        "laboratoriesO":mapToString(laboratories)
     }
     
     return JSON.stringify(ef)
