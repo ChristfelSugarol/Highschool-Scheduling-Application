@@ -67,8 +67,11 @@ function selectSlot(button){
     }
 
     if (activeSelector != 0){ //A whole bunch of if statements to see if the button meets the necessary requirements
+
+        // Check if the slot is on the same table as the others
+        if (selection["map"] == "" || (map == selection["map"] && item == selection["item"])){
+
         // Check if the slot is on the same day as the others 
-        
         if (day == selection[activeSelector]["day"] || selection[activeSelector]["day"] == ""){
             //Check if the slot is adjacent to the others
             if (selection[activeSelector]["slots"].includes(''+(parseInt(slot)-1)) || selection[activeSelector]["slots"].includes(''+(parseInt(slot)+1)) || selection[activeSelector]["slots"].length == 0 || (selection[activeSelector]["slots"].length == 1 && selection[activeSelector]["slots"].includes(slot))){
@@ -115,8 +118,16 @@ function selectSlot(button){
                 } else {
                     selection[activeSelector]["day"] = day
                 }
+
+                if (selection[1]["slots"].length == 0 && selection[2]["slots"].length == 0){
+                    selection["map"] = ""
+                    selection["item"] = ""
+                } else if (selection["map"] == ""){
+                    selection["map"] = map
+                    selection["item"] = item
+                }
             }
-        }
+        }}
     } else {
         return
     }
@@ -126,13 +137,68 @@ function selectSlot(button){
 
 function swapSchedules(){
     if (selection[1]["slots"].length == selection[2]["slots"].length){
-        console.log("yeah this works")
-        resetSlotSelection()
+
+        selection[1]["slots"].sort()
+        selection[2]["slots"].sort()
+        var tempSlots = []
+
+        selection[1]["slots"].forEach((slot) => {
+            tempSlots.push(window[selection["map"]].get(selection["item"]).get(selection[1]["day"]).get(slot)
+        )})
+
+        selection[2]["slots"].forEach((slot, key) => {
+            window[selection["map"]].get(selection["item"]).get(selection[1]["day"]).set(selection[1]["slots"][key], window[selection["map"]].get(selection["item"]).get(selection[2]["day"]).get(slot))
+        })
+
+        tempSlots.forEach((slot, key) => {
+            window[selection["map"]].get(selection["item"]).get(selection[2]["day"]).set(selection[2]["slots"][key], slot)
+        })
+        
+        //Reset schedule map
+        selection = {
+            map: "",
+            item: "",
+            1: {
+                day: "",
+                slots: [],
+                cellColor: "#90EE90",
+                cells: []
+            },
+            2: {
+                day: "",
+                slots: [],
+                cellColor: "#006400",
+                cells: []
+            }
+        }
+        renderTable()
     }
 }
 
 function verifyConflicts(){
+    //Iterate through every single slot in teachers
+    /*teacher_schedules.forEach((item1_obj, item1) => {
+        item1_obj.forEach((day1_obj, day1) => {
+            day1_obj.forEach((slot1_obj, slot1) => {
+                if (slot1_obj != "None"){
 
+                    //Compare the current slot to every other slot in teachers
+                    teacher_schedules.forEach((item2_obj, item2) => {
+                        if (item2_obj != item1_obj){
+                            item2_obj.forEach((day2_obj, day2) => {
+                                day1_obj.forEach((slot2_obj, slot2) => {
+                                    if (slot2_obj != "None"){
+                                        if (slot1_obj.get("Section") == slot2_obj.get("Section")){
+                                            document.querySelector(`[data-slotid=teacher_schedules${item1}${day1}${slot1}]`).style.backgroundColor = "#FF0000";
+                                            document.querySelector(`[data-slotid=teacher_schedules${item2}${day2}${slot2}]`).style.backgroundColor = "#FF0000";
+                                        } } }) }) }
+                    })
+
+                    section_schedules
+                }
+            })
+        })
+    })*/
 }
 
 function returnToSwapBarMain(){

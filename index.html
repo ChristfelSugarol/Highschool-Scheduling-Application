@@ -132,7 +132,7 @@
                 </fieldset>
                 <fieldset id="subjectSpecialField">
                     <legend>Subject Type</legend>
-                    <div><input type="radio" id="none" name="subjectType" value="none" checked="checked"><label for="none">N/A</label></div>
+                    <div><input type="radio" id="nosubjecttype" name="subjectType" value="none" checked="checked"><label for="nosubjecttype">N/A</label></div>
                     <div><input type="radio" id="mathsci" name="subjectType" value="mathsci"><label for="mathsci">Math/Science</label></div>
                     <div><input type="radio" id="lunch" name="subjectType" value="lunch"><label for="lunch">Lunch</label></div><br>
                 </fieldset>
@@ -143,8 +143,8 @@
                     <ul class="labelAlign">
                         <li>
                             <label for="labPeriods">Laboratory Periods:</label>
-                            <input type="number" id="labPeriods" placeholder="1" min="1" style="display:none">
-                            <input type="text" style="width:50%" id="noLabDisplay" disabled value="N/A">
+                            <input type="number" id="labPeriods" placeholder="1" min="1">
+                            <input type="text" style="width:50%; display:none" id="noLabDisplay" disabled value="N/A">
                         </li>
                     </ul>
                 </fieldset>
@@ -451,6 +451,7 @@
                     if (has_schedule == true){
                         buttonInteractions.innerHTML = '<button onclick="export_pdf()" id = "export_button" style="margin: 2px;">Export</button>' + buttonInteractions.innerHTML
                         buttonInteractions.innerHTML = '<button onclick="clear_schedule()" id = "clear_export_btn">Clear</button>' + buttonInteractions.innerHTML
+                        verifyConflicts()
                     } 
 
                     break;
@@ -459,8 +460,9 @@
             
             if (currentTab == "schedules"){
                 try{post_process()}catch(e){}        
+            } else {
+                interaction("default")
             }
-
         }
 
         function search() {
@@ -825,6 +827,10 @@
             const entry_buttons = document.getElementsByClassName('entry_button');
             const entry_nums = document.getElementsByClassName('entry_number');
 
+            if (user_in == "default" && activeButton == ""){
+                return
+            }
+
             if (activeButton === user_in) {
                 document.getElementById(user_in).style.backgroundColor = "#3b82f6";
                 activeButton = "";
@@ -838,13 +844,16 @@
                     document.getElementById(activeButton).style.backgroundColor = "#3b82f6";
                 }
 
-                document.getElementById(user_in).style.backgroundColor = "red";
-                activeButton = user_in;
+                if (user_in != "default"){
+                    activeButton = user_in;
+                }
+                document.getElementById(activeButton).style.backgroundColor = "red";
+                
 
                 for (let i = 0; i < entry_buttons.length; i++) {
                     entry_nums[i].style.display = "none";
                     entry_buttons[i].style.display = "block";
-                    const actionType = capitalizeFirstLetter(user_in.replace("_button", ""));
+                    const actionType = capitalizeFirstLetter(activeButton.replace("_button", ""));
                     entry_buttons[i].textContent = actionType;
                     entry_buttons[i].setAttribute("onClick", `button_interaction(this, '${actionType}')`);
                 }
@@ -934,8 +943,9 @@
                 case 'laboratories':
                     newItem = {
                         "name": name,
+                        "subjects": []
                     }
-                    laboratories.set(id, populateMap(new Map(), newItem, Object,keys(newItem)));
+                    laboratories.set(id, populateMap(new Map(), newItem, Object.keys(newItem)));
                     break;
                 // You can add cases for 'classrooms' similarly if needed
             }
@@ -953,7 +963,14 @@
                 document.getElementById('triplePeriods').value = "";
                 document.getElementById('laboratories').value = "none";
                 document.getElementById('labPeriods').value = 1;
+
+                document.getElementById('nosubjecttype').checked = "checked";
             }
+            document.getElementById("mon").checked = "checked";
+            document.getElementById("tue").checked = "checked";
+            document.getElementById("wed").checked = "checked";
+            document.getElementById("thu").checked = "checked";
+            document.getElementById("fri").checked = "checked";
 
             document.getElementById('addForm').onsubmit = function (e) {
                 e.preventDefault();
@@ -965,7 +982,7 @@
             };
         }
 
-        function updateAddData(thingy){ 
+        function updateAddData(thingy){
             switch (currentTab){
                 case 'teachers':
                     subjects.forEach(item => {
@@ -1012,14 +1029,29 @@
             // Populate modal fields with item data
             document.getElementById('name').value = item.get("name");
             document.getElementById('id').value = id;
-
             if (currentTab === 'subjects') {
-                document.getElementById('singlePeriods').value = item.get("periods").get("single") || 0;
-                document.getElementById('doublePeriods').value = item.get("periods").get("double") || 0;
-                document.getElementById('triplePeriods').value = item.get("periods").get("triple") || 0;
-            }
+                document.getElementById('singlePeriods').value = item.get("periods").get("single") || "";
+                document.getElementById('doublePeriods').value = item.get("periods").get("double") || "";
+                document.getElementById('triplePeriods').value = item.get("periods").get("triple") || "";
+                console.log(item.get("laboratory").get("room"))
+                document.getElementById('laboratories').value = item.get("laboratory").get("room") || "none";
+                document.getElementById('labPeriods').value = item.get("laboratory").get("periods") || 1;
 
-            
+                if (item.get("break") != null){
+                    document.getElementById('lunch').checked = "checked";
+                } else if (item.get("isMathSci") == true) {
+                    document.getElementById('mathsci').checked = "checked";
+                } else{
+                    document.getElementById('nosubjecttype').checked = "checked";
+                }
+            }
+            item.get("availability").forEach((state, key) => {
+                if (state == true){
+                    document.getElementById(key).checked = "checked";
+                } else {
+                    document.getElementById(key).checked = false;
+                }
+            })
 
             // Show the modal
             showModal();
