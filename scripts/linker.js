@@ -15,8 +15,11 @@ function parseStringToMap(data){
 }
 
 function dataToSchedule(){
+    console.log(backend_process_output[backend_process_output.length - 2])
+
     data1 = parseStringToMap(backend_process_output[backend_process_output.length - 1])
     data2 = parseStringToMap(backend_process_output[backend_process_output.length - 2])
+    
     //.replace(/None/g, 'null').replace(/'/g, '"').replace(/(\{|\,)\s*(\d+)\s*\:/g, '$1"$2":')
     console.log("Schedule Data Check")
     console.log(data1)
@@ -81,9 +84,15 @@ function remapSectionSchedules(data){
 
 function runBackEnd(data) {
     console.log("Starting Python process...");
+
+    
+
     return new Promise((resolve, reject) => {
-        const childPython = spawn('backend/dist/scheduler/scheduler.exe', [JSON.stringify(data)]);
+        const childPython = spawn('python', ['backend/dist/scheduler/scheduler.py'])
         let fullOutput = '';
+
+        childPython.stdin.write(JSON.stringify(data));
+        childPython.stdin.end();
 
         // Handle each line of output in real-time
         childPython.stdout.on('data', (data) => {
@@ -129,6 +138,7 @@ function runBackEnd(data) {
 async function write_input_to_file(data) {
     try {
         const result = await runBackEnd(data);
+        console.log("Algorithm Process Done")
         dataToSchedule()
         renderTable()
         return result;
