@@ -16,6 +16,7 @@
     <script src="scripts/export.mjs"></script>
     <script src="scripts/mergepdf.js"></script>
     <script src="scripts/schedule-renderer.js"></script>
+    <script src="scripts/slot-swapper.js"></script>
     <script src="data.js"></script>
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
@@ -160,6 +161,30 @@
         </div>
     </div>
 
+    <footer id="swapBarMain" style="display:none" class="footer">
+        <ul>
+            <span style="margin-right:40px">Swap Schedule Slots</span>
+            <button onclick="changeActiveSwapSelector(1)">1st Slot</button>
+            <button onclick="changeActiveSwapSelector(2)">2nd Slot</button>
+            <button style="background-color:red" onclick="resetSlotSelection()">Clear Selection</button>
+            <button onclick="swapSchedules()">Confirm</button>
+        </ul>
+    </footer>
+    <footer id="swapBar1" style="display:none" class="footer">
+        <ul>
+            <span style="margin-right:40px">Select 1st set of Slots to Swap</span>
+            <button onclick="resetSlotSelection()" style="background-color:red">Clear Selection</button>
+            <button onclick="returnToSwapBarMain()">Confirm</button>
+        </ul>
+    </footer>
+    <footer id="swapBar2" style="display:none" class="footer">
+        <ul>
+            <span style="margin-right:40px">Select 2nd set of Slots to Swap</span>
+            <button onclick="resetSlotSelection()" style="background-color:red">Clear Selection</button>
+            <button onclick="returnToSwapBarMain()">Confirm</button>
+        </ul>
+    </footer>
+
     <script>
         var active_file = ""
 
@@ -187,8 +212,6 @@
         var subjects = populateMap(new Map(),subjectsO,Object.keys(subjectsO));
         var sections = populateMap(new Map(),sectionsO,Object.keys(sectionsO));
         var laboratories = populateMap(new Map(),laboratoriesO,Object.keys(laboratoriesO))       
-        var teacher_schedules = new Map();
-        var section_schedules = new Map();
 
         function parseStringToMap(data){
             data = data.replace(/None/g, '"None"')
@@ -338,7 +361,7 @@
                     laboratory = `${item.get("laboratory").get("room")}`
                 }
 
-                html += newRow(item, id, index++) + `<td>${item.get("teachers").join(', ')}</td><td>${item.get("section")}</td><td>${type}</td><td>${laboratory}</td><td>S: ${periods.get("single")}, D: ${periods.get("double")}, T: ${periods.get("triple")}</td><td class="availability">`;
+                html += newRow(item, id, index++) + `<td>${item.get("teachers").join(', ')}</td><td>${item.get("section").join(',  ')}</td><td>${type}</td><td>${laboratory}</td><td>S: ${periods.get("single")}, D: ${periods.get("double")}, T: ${periods.get("triple")}</td><td class="availability">`;
                 const availability = item.get("availability");
                 ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
                     html += `<span class="${availability.get(day) ? 'available' : 'unavailable'}">${day[0].toUpperCase()}</span>`;
@@ -362,20 +385,10 @@
             let index = 1;
             let html = '';
             data.forEach((item, id) => {
-                html += newRow(item,id,index++) + `<td>${item.get("subjects").join(': ')}</td>`;
+                html += newRow(item,id,index++) + `<td>${item.get("subjects").join(', ')}</td>`;
             });
             html += '</tr>';
             return html
-        }
-
-        dvar = ""
-
-        function renderTeacherSchedules(){
-            table.innerHTML = renderSchedules()
-        }
-
-        function renderSectionSchedules(){
-
         }
 
         async function renderTable() {        // Contains headers and render calls
@@ -386,6 +399,7 @@
             switch(currentTab) {
                 case 'teachers':
                     document.getElementById('schedulebar').style.display = "none"
+                    document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th><th>Availability</th></tr>';
                     html += await renderTeachers(teachers) + '</table>';
                     buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
@@ -393,6 +407,7 @@
 
                 case 'subjects':
                     document.getElementById('schedulebar').style.display = "none"
+                    document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Teachers</th><th>Section</th><th>Type</th><th>Laboratory</th><th>Periods</th><th>Availability</th></tr>';
                     html +=  await renderSubjects(subjects) + '</table>';
                     buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
@@ -400,6 +415,7 @@
 
                 case 'laboratories':
                     document.getElementById('schedulebar').style.display = "none"
+                    document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th></tr>';
                     html += await renderLaboratories(laboratories) + '</table>';
                     buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
@@ -407,6 +423,7 @@
 
                 case 'sections':
                     document.getElementById('schedulebar').style.display = "none"
+                    document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th></tr>';
                     html += await renderSections(sections) + '</table>';
                     buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
@@ -414,15 +431,20 @@
 
                 case 'schedules':
                     document.getElementById('schedulebar').style.display = "flex"
-                    if (currentSchedule == "teachers"){
-                        html += await renderSchedules(teacher_schedules);
+                    document.getElementById("swapBarMain").style.display = "flex"
+                    let has_schedule = false;
+                    if (currentSchedule == "teachers"){     
+                        if(teacher_schedules.size > 0){
+                            has_schedule = true;
+                            html += await renderSchedules(teacher_schedules, "teacher_schedules");
+                        }
                     }
-                    else{
-                        html += await renderSchedules(section_schedules);
+                    else if (currentSchedule == 'sections'){
+                        if(section_schedules.size > 0){
+                            has_schedule = true;
+                            html += await renderSchedules(section_schedules, "section_schedules");
+                        }
                     };
-
-
-
 
                     buttonInteractions.innerHTML = '<button onclick="generate()" id = "generateTimetable">Generate Table</button>'
                     
@@ -1134,8 +1156,10 @@
                     break;
                 case 'laboratories':
                     subjects.forEach(item => {
-                        if (item.get('laboratory').get('room') == name) {
-                            item.set('laboratory', null)
+                        if (item.get('laboratory' != null)){
+                            if (item.get('laboratory').get('room') == oldname) {
+                                item.get('laboratory').set('room', name)
+                            }
                         }
                     });
                     break;

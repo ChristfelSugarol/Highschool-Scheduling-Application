@@ -1,4 +1,4 @@
-function renderSchedules(data) {
+function renderSchedules(data, maptype) {
     let html = '';
     data.forEach((item, id) => {
 
@@ -10,8 +10,8 @@ function renderSchedules(data) {
                 timeslots.push(`<tr class="sched_tr"><td class="timeLabel">00:00-00:00</td>`)
             }
 
-            item.forEach((day, id) => {
-                day.forEach((slot, id) => { 
+            item.forEach((day, id1) => {
+                day.forEach((slot, id2) => { 
 
                     try {
 
@@ -23,20 +23,20 @@ function renderSchedules(data) {
                     }
 
 
-
-
                     if (slot != "None") {
                         // ============== Replace this method; in case the actual Name parameter contains a comma ============
                         //timeslots[id] += `<td>${[...slot].join("\n").replace(/,/g, ": ")}</td>`
                        
                         
-                        var slot_entry = "<td style='padding:0.4rem'><table>"
+                        var slot_entry = `<td data-selected="false" data-slotid='${maptype}${id}${id1}${id2}' data-map='${maptype}' data-item='${id}' data-day='${id1}' data-slot='${id2}' style='padding:0.4rem' onclick='selectSlot(this)'><table>`
 
                         
                         
                         slot.forEach((tslot, tid) => {
-                            var str_in = tslot
-                            slot_entry += '<tr style="padding:0.2rem; border: 0px"><td style="padding:0.2rem;  border: 0px">' + str_in + '</td></tr>'
+                            if (tid != "Conflicts" && tid != "LinkedPeriods"){
+                                var str_in = tslot
+                                slot_entry += '<tr style="padding:0.2rem; border: 0px"><td style="padding:0.2rem;  border: 0px">' + str_in + '</td></tr>'
+                            }
                         }) 
 
                         slot_entry += "</table></td>" 
@@ -44,10 +44,10 @@ function renderSchedules(data) {
 
 
 
-                        timeslots[id] += slot_entry 
+                        timeslots[id2] += slot_entry 
                     }
                     else{
-                        timeslots[id] += "<td style='padding:0.4rem;'><table style='padding:0.2rem; border: 0px'><tr style='padding:0.2rem; border: 0px'><td style='padding:0.2rem; border: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>102106</div></td></tr><tr><td style='padding:0rem; border: 0px; margin: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>102106</div></td></tr></table></td>"
+                        timeslots[id2] += `<td data-selected="false" data-slotid='${maptype}${id}${id1}${id2}' data-map='${maptype}' data-item='${id}' data-day='${id1}' data-slot='${id2}' style='padding:0.4rem;' onclick='selectSlot(this)'><table style='padding:0.2rem; border: 0px'><tr style='padding:0.2rem; border: 0px'><td style='padding:0.2rem; border: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>102106</div></td></tr><tr><td style='padding:0rem; border: 0px; margin: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>102106</div></td></tr></table></td>`
                         
                     }
                 });

@@ -1,5 +1,8 @@
 const { spawn } = require('child_process');
 
+var teacher_schedules = new Map();
+var section_schedules = new Map();
+
 var backend_process_output = []
 
 function parseStringToMap(data){
@@ -19,9 +22,62 @@ function dataToSchedule(){
     console.log(data1)
     console.log(data2)
 
-    teacher_schedules = populateMap(teacher_schedules,data1,Object.keys(data1));
-    section_schedules = populateMap(section_schedules,data2,Object.keys(data2));
+    teacher_schedules = remapTeacherSchedules(populateMap(teacher_schedules,data1,Object.keys(data1)));
+    section_schedules = remapSectionSchedules(populateMap(section_schedules,data2,Object.keys(data2)));
 }
+
+function remapTeacherSchedules(data){
+    data.forEach((item, id1) => {
+        item.forEach((day,id2) => {
+            day.forEach((slot, id3) => {
+                if (slot != "None"){
+                    slot.set("Conflicts", [])
+                    // Search for linked timeslots
+                    let linkedperiods = []
+                    for (i = parseInt(id3)-2; i <= parseInt(id3)+2; i++){
+                        let id4 = ''+i
+                        if (day.has(id4)){
+                            if(day.get(id4) != "None"){
+                                if(day.get(id4).get("Section") == slot.get("Section") && day.get(id4).get("Subject") == slot.get("Subject")){
+                                    linkedperiods.push(id4)
+                                }
+                            }
+                        }
+                    }
+                    slot.set("LinkedPeriods", linkedperiods)
+                }
+            })
+        })
+    })
+    return data
+}
+
+function remapSectionSchedules(data){
+    data.forEach((item, id1) => {
+        item.forEach((day,id2) => {
+            day.forEach((slot, id3) => {
+                if (slot != "None"){
+                    slot.set("Conflicts", [])
+                    // Search for linked timeslots
+                    let linkedperiods = []
+                    for (i = parseInt(id3)-2; i <= parseInt(id3)+2; i++){
+                        let id4 = ''+i
+                        if (day.has(id4)){
+                            if(day.get(id4) != "None"){
+                                if(day.get(id4).get("Teacher") == slot.get("Teacher") && day.get(id4).get("Subject") == slot.get("Subject")){
+                                    linkedperiods.push(id4)
+                                }
+                            }
+                        }
+                    }
+                    slot.set("LinkedPeriods", linkedperiods)
+                }
+            })
+        })
+    })
+    return data
+}
+
 
 function runBackEnd(data) {
     console.log("Starting Python process...");
