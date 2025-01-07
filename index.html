@@ -18,6 +18,7 @@
     <script src="scripts/schedule-renderer.js"></script>
     <script src="scripts/slot-swapper.js"></script>
     <script src="data.js"></script>
+    <script src="scripts/edit-patches.js"></script>
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
 <body>
@@ -1004,14 +1005,6 @@
             }
         }
 
-        function update_edit_checkboxes(checkboxes, item_array){
-            for (var i = 0; i < checkboxes.length; i++){
-                    if (item_array.includes(checkboxes[i].firstChild.value)){
-                        checkboxes[i].firstChild.checked=true 
-                    }
-            }
-        }
-
         function editItem(id) {
             const modal = document.getElementById('addModal');
             const modalTitle = document.getElementById('modalTitle');
@@ -1024,9 +1017,27 @@
             document.getElementById('name').value = item.get("name");
             document.getElementById('id').value = id;
 
-            if (currentTab === 'subjects') {
-                console.log(item)
+            console.log(item)
 
+            if (currentTab === 'teachers') {
+                // Getting and setting the values for subjects
+                update_edit_checkboxes(document.getElementById('subjects').getElementsByTagName("label"), item.get("subjects"))
+
+                // Getting and Setting the values for the available days
+                const available_checkboxes = document.getElementById('availableDays').getElementsByTagName("div")
+                const subject_availability = item.get('availability')
+
+                var ite = 0
+                for (let [key, value] of subject_availability){
+                    console.log(available_checkboxes[ite].firstChild)
+
+                    available_checkboxes[ite].firstChild.checked = value
+                    
+                    ite++
+                }
+            }
+
+            if (currentTab === 'subjects') {
                 // Getting and setting the values for sections
                 update_edit_checkboxes(document.getElementById('sections').getElementsByTagName("label"), item.get("section"))
 
