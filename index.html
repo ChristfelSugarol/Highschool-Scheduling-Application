@@ -151,7 +151,7 @@
                 </fieldset>
                 <fieldset id="fixedSchedule">
                     <legend>Fixed Schedule</legend>
-                    <button onclick="updated_fixed_schedule()">Enable Fixed Schedule?</button>
+                    <button type="button" onclick="updated_fixed_schedule()">Enable Fixed Schedule?</button>
 
                     <table id="scheduleGrid"></table>
                     <div id="savedState"></div>
@@ -943,9 +943,6 @@
 
         function addItem() {
             showModal();
-
-            
-
 
             document.getElementById('addForm').onsubmit = function (e) {
                 e.preventDefault();
