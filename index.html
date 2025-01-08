@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>School Management System</title>
-    <script src="jquery-3.7.1.min.js" type="text/javascript"></script>
+    <script src="jquery-3.7.1.min.js"></script>
     <script src="scripts/constant.js"></script>
     <script src="scripts/generate.js"></script>
     <script src="scripts/script.js"></script>
@@ -18,17 +18,20 @@
     <script src="scripts/schedule-renderer.js"></script>
     <script src="scripts/slot-swapper.js"></script>
     <script src="data.js"></script>
+    <script src="scripts/edit-patches.js"></script>
+    <script src="scripts/listener.js"></script>
+    
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
 <body>
     <header>
         <nav id="menubar">
             <ul>
-                <button onclick="newFile()">New</button>
-                <button onclick="selectFile()">Open</button>
-                <button onclick="saveOnCurrent()">Save</button>
-                <button onclick="saveCustomFile()">Save As...</button>
-                <button>Options</button>
+                <button onclick="newFile()"><img src="icons/New.png" alt="description" height="40px"></button>
+                <button onclick="selectFile()"><img src="icons/Open.png" alt="description" height="40px"></button>
+                <button onclick="saveOnCurrent()"><img src="icons/Save.png" alt="description" height="40px"></button>
+                <button onclick="saveCustomFile()"><img src="icons/Save_As.png" alt="description" height="40px"></button>
+                <button><img src="icons/Options.png" alt="description" height="40px"></button>
             </ul>
             <div id="filenameDisplay">
                 Untitled
@@ -150,8 +153,8 @@
                 </fieldset>
                 <fieldset id="fixedSchedule">
                     <legend>Fixed Schedule</legend>
-                    <p></p>
-                    Enable Fixed Schedule? <input type="checkbox" id="enableFixedSched">
+                    <button type="button" onclick="updated_fixed_schedule()">Enable Fixed Schedule?</button>
+
                     <table id="scheduleGrid"></table>
                     <div id="savedState"></div>
                     <div id="structuredSchedule"></div>
@@ -515,7 +518,6 @@
         }
      
         function showModal() {
-            console.log("This")
             const modal = document.getElementById('addModal');
             const modalTitle = document.getElementById('modalTitle');
             const availableDays = document.getElementById('availableDays');
@@ -593,7 +595,8 @@
         }
 
         function closeModal() {
-            document.getElementById('addModal').style.display = 'none';
+            var modal_block = document.getElementById('addModal')
+            modal_block.style.display = 'none';
         }
 
         // Fixed Schedule Logic Starts Here
@@ -811,7 +814,7 @@
         }
 
         // Initialization of fixedschedule table
-        createTable();
+        // createTable();
         // code below is for debugging, COMMENT OUT WHEN DONE
         displaySavedState();
 
@@ -883,11 +886,10 @@
             let newItem;
             switch(currentTab) {
                 case 'subjects':
-                    var checkBox = document.getElementById("enableFixedSched");
                     const subjectType = document.querySelector('input[name="subjectType"]:checked').value
                     const labValue = document.getElementById('laboratories').value
                     newItem = { 
-                        "has_definite_schedule": checkBox.checked,
+                        "has_definite_schedule": show_fixed,
                         "has_teacher": selectedTeachers.length == true || false,
                         "laboratory": (labValue == 'none')? null: {
                             "room": labValue,
@@ -977,6 +979,7 @@
                 constructItem();
                 const item = getCurrentTabData().get(document.getElementById("id").value)
                 updateAddData(item);
+                reset_form()
                 closeModal();
                 renderTable();
             };
@@ -1026,16 +1029,59 @@
             const modalTitle = document.getElementById('modalTitle');
             const item = getCurrentTabData().get(id); // Fetch item based on the current tab
 
+            // Show the modal
+            showModal();
+
             // Populate modal fields with item data
             document.getElementById('name').value = item.get("name");
             document.getElementById('id').value = id;
+
+            console.log(item)
+
+            if (currentTab === 'teachers') {
+                // Getting and setting the values for subjects
+                update_edit_checkboxes(document.getElementById('subjects').getElementsByTagName("label"), item.get("subjects"))
+
+                // Getting and Setting the values for the available days
+                const available_checkboxes = document.getElementById('availableDays').getElementsByTagName("div")
+                const subject_availability = item.get('availability')
+
+                var ite = 0
+                for (let [key, value] of subject_availability){
+                    console.log(available_checkboxes[ite].firstChild)
+
+                    available_checkboxes[ite].firstChild.checked = value
+                    
+                    ite++
+                }
+            }
+
             if (currentTab === 'subjects') {
-                document.getElementById('singlePeriods').value = item.get("periods").get("single") || "";
-                document.getElementById('doublePeriods').value = item.get("periods").get("double") || "";
-                document.getElementById('triplePeriods').value = item.get("periods").get("triple") || "";
-                console.log(item.get("laboratory").get("room"))
-                document.getElementById('laboratories').value = item.get("laboratory").get("room") || "none";
-                document.getElementById('labPeriods').value = item.get("laboratory").get("periods") || 1;
+                // Getting and setting the values for sections
+                update_edit_checkboxes(document.getElementById('sections').getElementsByTagName("label"), item.get("section"))
+
+                // Getting and setting the values for teachers
+                update_edit_checkboxes( document.getElementById('teachers').getElementsByTagName("label"), item.get("teachers"))
+
+                // Getting the values for the subject numbers
+                document.getElementById('singlePeriods').value = item.get("periods").get("single") || 0;
+                document.getElementById('doublePeriods').value = item.get("periods").get("double") || 0;
+                document.getElementById('triplePeriods').value = item.get("periods").get("triple") || 0;
+
+                // Getting and Setting the values for the available days
+                const available_checkboxes = document.getElementById('availableDays').getElementsByTagName("div")
+                const subject_availability = item.get('availability')
+
+                var ite = 0
+                for (let [key, value] of subject_availability){
+                    console.log(available_checkboxes[ite].firstChild)
+
+                    available_checkboxes[ite].firstChild.checked = value
+                    
+                    ite++
+                }
+
+            }
 
                 if (item.get("break") != null){
                     document.getElementById('lunch').checked = "checked";
@@ -1053,8 +1099,7 @@
                 }
             })
 
-            // Show the modal
-            showModal();
+
             // Change modal title
             switch(currentTab){
                 case 'laboratories': {modalTitle.textContent = `Edit Laboratory`; break;}
@@ -1067,9 +1112,8 @@
                 e.preventDefault();
                 console.log(document.getElementById("name"))
                 updateItem(id); // Update item on submission
-                
+                reset_form()
             };
-        }
 
         function updateItem(id) {
             const data = getCurrentTabData()
