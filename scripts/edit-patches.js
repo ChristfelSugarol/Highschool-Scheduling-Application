@@ -36,6 +36,8 @@ function updated_fixed_schedule(){
 }
 
 function reset_form(){
+    show_fixed = false
+
     document.getElementById("name").value = "";
     document.getElementById("id").value = "";
     if (currentTab === 'subjects') {
@@ -50,6 +52,11 @@ function reset_form(){
     for (let it of schedule_checkboxes){
         it.checked = true
     }
+}
 
-    console.log("testing")
+function name_to_id(name, prefix){
+    id = name.replace(" ", "-")
+    id = prefix[0] + prefix[1] + "_" + id
+
+    return id
 }
