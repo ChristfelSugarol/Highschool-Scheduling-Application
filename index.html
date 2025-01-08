@@ -151,8 +151,8 @@
                 </fieldset>
                 <fieldset id="fixedSchedule">
                     <legend>Fixed Schedule</legend>
-                    <p></p>
-                    Enable Fixed Schedule? <input type="checkbox" id="enableFixedSched">
+                    <button onclick="updated_fixed_schedule()">Enable Fixed Schedule?</button>
+
                     <table id="scheduleGrid"></table>
                     <div id="savedState"></div>
                     <div id="structuredSchedule"></div>
@@ -810,7 +810,7 @@
         }
 
         // Initialization of fixedschedule table
-        createTable();
+        // createTable();
         // code below is for debugging, COMMENT OUT WHEN DONE
         displaySavedState();
 
@@ -875,11 +875,10 @@
             let newItem;
             switch(currentTab) {
                 case 'subjects':
-                    var checkBox = document.getElementById("enableFixedSched");
                     const subjectType = document.querySelector('input[name="subjectType"]:checked').value
                     const labValue = document.getElementById('laboratories').value
                     newItem = { 
-                        "has_definite_schedule": checkBox.checked,
+                        "has_definite_schedule": show_fixed,
                         "has_teacher": selectedTeachers.length == true || false,
                         "laboratory": (labValue == 'none')? null: {
                             "room": labValue,
@@ -945,22 +944,15 @@
         function addItem() {
             showModal();
 
-            // Reset input field
-            document.getElementById("name").value = "";
-            document.getElementById("id").value = "";
-            if (currentTab === 'subjects') {
-                document.getElementById('singlePeriods').value = "";
-                document.getElementById('doublePeriods').value = "";
-                document.getElementById('triplePeriods').value = "";
-                document.getElementById('laboratories').value = "none";
-                document.getElementById('labPeriods').value = 1;
-            }
+            
+
 
             document.getElementById('addForm').onsubmit = function (e) {
                 e.preventDefault();
                 constructItem();
                 const item = getCurrentTabData().get(document.getElementById("id").value)
                 updateAddData(item);
+                reset_form()
                 closeModal();
                 renderTable();
             };
@@ -1079,7 +1071,7 @@
                 e.preventDefault();
                 console.log(document.getElementById("name"))
                 updateItem(id); // Update item on submission
-                
+                reset_form()
             };
         }
 
