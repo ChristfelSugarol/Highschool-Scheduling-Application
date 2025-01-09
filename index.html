@@ -394,18 +394,23 @@
             return html
         }
 
+        var active_inter_btn = ""
+
         async function renderTable() {        // Contains headers and render calls
             const tableContainer = document.getElementById('dataTable');
             let html = '';
             let buttonInteractions = document.getElementById('buttonInteractions')
+            var interaction_main = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
 
+
+            
             switch(currentTab) {
                 case 'teachers':
                     document.getElementById('schedulebar').style.display = "none"
                     document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th><th>Availability</th></tr>';
                     html += await renderTeachers(teachers) + '</table>';
-                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    buttonInteractions.innerHTML = interaction_main
                     break;
 
                 case 'subjects':
@@ -413,7 +418,7 @@
                     document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Teachers</th><th>Section</th><th>Type</th><th>Laboratory</th><th>Periods</th><th>Availability</th></tr>';
                     html +=  await renderSubjects(subjects) + '</table>';
-                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    buttonInteractions.innerHTML = interaction_main
                     break;
 
                 case 'laboratories':
@@ -421,7 +426,7 @@
                     document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th></tr>';
                     html += await renderLaboratories(laboratories) + '</table>';
-                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    buttonInteractions.innerHTML = interaction_main
                     break;
 
                 case 'sections':
@@ -429,7 +434,7 @@
                     document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th></tr>';
                     html += await renderSections(sections) + '</table>';
-                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    buttonInteractions.innerHTML = interaction_main
                     break;
 
                 case 'schedules':
@@ -459,7 +464,14 @@
                     break;
             }
             tableContainer.innerHTML = html;
+
             
+            if (currentTab != 'schedules'){
+                if (active_inter_btn != ""){
+                    interaction(active_inter_btn, false)
+                }
+            }
+
             if (currentTab == "schedules"){
                 try{post_process()}catch(e){}        
             }
@@ -824,13 +836,16 @@
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
-        function interaction(user_in) {
+        var active_inter_btn = ""
+
+        function interaction(user_in, mode = true) {
             const entry_buttons = document.getElementsByClassName('entry_button');
             const entry_nums = document.getElementsByClassName('entry_number');
 
-            if (activeButton === user_in) {
+            if ((activeButton === user_in) && mode) {
                 document.getElementById(user_in).style.backgroundColor = "#3b82f6";
                 activeButton = "";
+                active_inter_btn = ""
 
                 for (let i = 0; i < entry_buttons.length; i++) {
                     entry_buttons[i].style.display = "none";
@@ -843,6 +858,7 @@
 
                 document.getElementById(user_in).style.backgroundColor = "red";
                 activeButton = user_in;
+                active_inter_btn = user_in
 
                 for (let i = 0; i < entry_buttons.length; i++) {
                     entry_nums[i].style.display = "none";
