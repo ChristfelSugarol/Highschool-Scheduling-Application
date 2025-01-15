@@ -57,7 +57,7 @@ def load_data(file_path, teachers_empty_space, groups_empty_space, subjects_orde
         class_list.append(new)
 
     # shuffle mostly because of teachers
-    random.shuffle(class_list)
+    # random.shuffle(class_list)
     # add classrooms
     for cl in class_list:
         classes[len(classes)] = cl
