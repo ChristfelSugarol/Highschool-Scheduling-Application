@@ -48,8 +48,9 @@ function renderSchedules(data, maptype) {
             html+=`<table style="table-layout:fixed"><colgroup><col width=10%></colgroup><tr><th colspan="6" class="sched_h1">${id}</th></tr><tr class="sched_h2"><td></td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td></tr>`;
         
             var timeslots = [];
+
             for (let i = 0; i < item.entries().next().value[1].size; i++) {
-                timeslots.push(`<tr class="sched_tr"><td class="timeLabel">00:00-00:00</td>`)
+                timeslots.push(`<tr class="sched_tr"><td class="timeLabel">` + TIMESLOT_LABEL[i] +`</td>`)
             }
 
             item.forEach((day, id1) => {

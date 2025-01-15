@@ -364,7 +364,102 @@
                     laboratory = `${item.get("laboratory").get("room")}`
                 }
 
-                html += newRow(item, id, index++) + `<td>${item.get("teachers").join(', ')}</td><td>${item.get("section").join(',  ')}</td><td>${type}</td><td>${laboratory}</td><td>S: ${periods.get("single")}, D: ${periods.get("double")}, T: ${periods.get("triple")}</td><td class="availability">`;
+
+
+                var periodString = ""
+                if (item.get('has_definite_schedule') == true){
+                    var table_element = document.createElement("table");
+                    table_element.style.borderCollapse = "collapse";
+                    table_element.style.width = "100%";
+                    table_element.style.textAlign = "center";
+                    
+                    // Loop to create rows and columns
+                    const rows = 13
+                    const cols = 5
+
+                    var fixed_map = new Map()
+
+                    var map_iter = 0
+                    for (const [key, value] of item.get('definite_schedule').entries()) {
+                        var inside_map = new Map()
+
+                        for (let a = 0; a < value.get('duration'); a++){
+                            var initial_pos = value.get('start') + a
+                            inside_map.set(initial_pos, "Something")
+                        }
+
+                        fixed_map.set(map_iter, inside_map)
+
+                        map_iter++
+                    }
+
+                    console.log(fixed_map)
+
+                    {
+                        var row = document.createElement("tr");
+
+                        // Create empty corner cell
+
+                        var cell = document.createElement("td");
+                        cell.style.border = "1px solid black";
+                        cell.style.padding = "8px";
+                        cell.textContent = ``
+                        row.appendChild(cell);
+
+                        
+                        for (var j = 0; j < cols; j++) {
+                            var cell = document.createElement("td");
+                            cell.style.border = "1px solid black";
+                            cell.style.padding = "8px";
+                            cell.textContent = weekdays[j]
+                            row.appendChild(cell);
+                        }
+
+                        table_element.appendChild(row);
+                    }
+
+                    for (var i = 0; i < rows; i++) {
+                        var row = document.createElement("tr");
+
+                        var cell = document.createElement("td");
+                        cell.style.border = "1px solid black";
+                        cell.style.padding = "8px";
+                        cell.textContent = TIMESLOT_LABEL[i]
+                        row.appendChild(cell);
+                        
+                        for (var j = 0; j < cols; j++) {
+                            var cell = document.createElement("td");
+                            cell.style.border = "1px solid black";
+                            cell.style.padding = "8px";
+
+                            try{
+                                if (fixed_map.get(j).get(i) == 'Something'){
+                                cell.style.backgroundColor = "green"
+                                } else {
+                                    cell.style.backgroundColor = "red"
+                                }
+                            } catch (e){
+
+                            }
+
+
+                            
+                            cell.textContent = ``
+                            row.appendChild(cell);
+                        }
+                        
+                        table_element.appendChild(row);
+                    }
+
+                    var table_sample = table_element.outerHTML
+
+                    periodString = `<div class="tooltip">Fixed Schedule <span class="tooltiptext">${table_sample}</span></div>`
+                } else {
+                    periodString = `S: ${periods.get("single")}, D: ${periods.get("double")}, T: ${periods.get("triple")}`
+                }
+
+
+                html += newRow(item, id, index++) + `<td>${item.get("teachers").join(', ')}</td><td>${item.get("section").join(',  ')}</td><td>${type}</td><td>${laboratory}</td><td>${periodString}</td><td class="availability">`;
                 const availability = item.get("availability");
                 ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
                     html += `<span class="${availability.get(day) ? 'available' : 'unavailable'}">${day[0].toUpperCase()}</span>`;
@@ -616,7 +711,7 @@
             primaryActiveCells: new Set(),
             additionalActiveCells: new Set()
         };
-        const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
 
         // Utility Functions
         function clearColumnCells(col) {
