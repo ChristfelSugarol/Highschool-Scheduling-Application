@@ -11,13 +11,24 @@ from hard_constraints import *
 from new_constraints import *
 import sys
 
+def convert_free(data, free):
+
+    new_free = []
+    
+    for b in range(13):
+        for a in range(5):
+            for c in range(len(data.classrooms)):
+                new_free.append(free[a*13*len(data.classrooms)+b*len(data.classrooms)+c])
+
+    return new_free
+
 
 def initial_population(data, matrix, free, filled, groups_empty_space, teachers_empty_space, subjects_order):
     """
     Sets up initial timetable for given classes by inserting in free fields such that every class is in its fitting
     classroom.
     """
-    
+             
     classes = data.classes
     
     # Initialize teacher timetable output
@@ -35,99 +46,138 @@ def initial_population(data, matrix, free, filled, groups_empty_space, teachers_
     section_matrix = intialize_matrix(section_names, {})
 
     for index, classs in classes.items():
+        print(classs.subject)
+
+    for index, classs in classes.items():
+        
+
         ind = 0
         
         if classs.definite is not None:
             class_num = classs.classrooms[0]
             class_pos = (int(classs.definite["day"])*NUMBER_OF_PERIODS + int(classs.definite["pos"]))
             it = 0
+            
+            # What the heck does this thing do?
             for a in free:
-                if (class_pos, class_num) == a:
+
+                print("({}, {}) and {}".format(class_pos, class_num, a))
+                if class_pos == a[0] and class_num == a[1]: 
                     ind = it
                     break
                 
                 it += 1
-            
-        
-                    
-        # ind = random.randrange(len(free) - int(classs.duration))
-        while True:
 
             start_field = free[ind]
+            print("Start Field {}".format(start_field))
             
             # check if class won't start one day and end on the next
             start_time = start_field[0]
             end_time = start_time + int(classs.duration) - 1
-            if start_time % NUMBER_OF_PERIODS > end_time % NUMBER_OF_PERIODS:
-                ind += 1
-                
-                continue
-
-            found = True
-            # check if whole block for the class is free
-            for i in range(1, int(classs.duration)):
-                field = (i + start_time, start_field[1])
-                
-                if field not in free:
-                    found = False
-                    ind += 1
-                    break
-
-            # secure that classroom fits
-            if start_field[1] not in classs.classrooms:
-                """print(classs.subject)
-                print(type(classs.classrooms))
-                print("does not fit")"""
-                ind += 1
-                continue
-        
-            #check if subject is already on the same day and section
-            if not initial_valid_subject_col(section_matrix, data, start_time, data.classes[index]):
-                ind += 1
-                continue
-            
-            #check if the subject is available for the same day
-            if not initial_valid_subject_day(data, start_time, data.classes[index]):
-                ind += 1
-                continue
-            
-            #check if the teacher is available for the same day
-            if not initial_valid_teacher_day(data, start_time, data.classes[index]):
-                ind += 1
-                continue
-            
-            #check if teacher already has a class on thiss slot
-            if (teacher_matrix[data.classes[index].teacher][DAYS[get_day_from_period(start_time)]][start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)] is not None):
-                print(teacher_matrix[data.classes[index].teacher][DAYS[get_day_from_period(start_time)]][start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)])
-                ind += 1
-                continue 
-
-            if found:                
-                for group_index in classs.groups:
-                    # add order of the subjects for group
-                    insert_order(subjects_order, classs.subject, group_index, classs.type, start_time)
-                    # add times of the class for group
-                    for i in range(int(classs.duration)):
-                        groups_empty_space[group_index].append(i + start_time)
-        
-
+    
+            for group_index in classs.groups:
+                # add order of the subjects for group
+                insert_order(subjects_order, classs.subject, group_index, classs.type, start_time)
+                # add times of the class for group
                 for i in range(int(classs.duration)):
-                    filled.setdefault(index, []).append((i + start_time, start_field[1]))        # add to filled
-                    free.remove((i + start_time, start_field[1]))                                # remove from free
-                    # add times of the class for teachers
-                    teachers_empty_space[classs.teacher].append(i + start_time)
+                    groups_empty_space[group_index].append(i + start_time)
+    
+
+            for i in range(int(classs.duration)):
+                filled.setdefault(index, []).append((i + start_time, start_field[1]))        # add to filled
+                free.remove((i + start_time, start_field[1]))                                # remove from free
+                # add times of the class for teachers
+                teachers_empty_space[classs.teacher].append(i + start_time)
+                
+                teacher_matrix[data.classes[index].teacher][DAYS[get_day_from_period(i + start_time)]][i + start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)] = {
+                    "Section": data.classes[index].classrooms,
+                    "Subject": data.classes[index].subject
+                }
+                
+                section_matrix[data.classrooms[start_field[1]].name][DAYS[get_day_from_period(i + start_time)]][i + start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)] = {
+                    "Subject": data.classes[index].subject,
+                    "Teacher": data.classes[index].teacher
+                }
+        else:
+            need_loop = False
+            # ind = random.randrange(len(free) - int(classs.duration))
+            while True:
+                if (ind == len(free)):
+                    ind = 0
+                    need_loop = True
+
+                start_field = free[ind]
+                
+                # check if class won't start one day and end on the next
+                start_time = start_field[0]
+                end_time = start_time + int(classs.duration) - 1
+                if start_time % NUMBER_OF_PERIODS > end_time % NUMBER_OF_PERIODS:
+                    ind += 1
                     
-                    teacher_matrix[data.classes[index].teacher][DAYS[get_day_from_period(i + start_time)]][i + start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)] = {
-                        "Section": data.classes[index].classrooms,
-                        "Subject": data.classes[index].subject
-                    }
+                    continue
+
+                found = True
+                # check if whole block for the class is free
+                for i in range(1, int(classs.duration)):
+                    field = (i + start_time, start_field[1])
                     
-                    section_matrix[data.classrooms[start_field[1]].name][DAYS[get_day_from_period(i + start_time)]][i + start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)] = {
-                        "Subject": data.classes[index].subject,
-                        "Teacher": data.classes[index].teacher
-                    }
+                    if field not in free:
+                        found = False
+                        ind += 1
+                        break
+
+                # secure that classroom fits
+                if start_field[1] not in classs.classrooms:
+                    ind += 1
+                    continue
+
+                if need_loop == False:
+                    #check if subject is already on the same day and section
+                    if not initial_valid_subject_col(section_matrix, data, start_time, data.classes[index]):
+                        ind += 1
+                        continue
                     
-                break
+                    #check if the subject is available for the same day
+                    if not initial_valid_subject_day(data, start_time, data.classes[index]):
+                        ind += 1
+                        continue
+                    
+                    #check if the teacher is available for the same day
+                    if not initial_valid_teacher_day(data, start_time, data.classes[index]):
+                        ind += 1
+                        continue
+                    
+                    #check if teacher already has a class on thiss slot
+                    if (teacher_matrix[data.classes[index].teacher][DAYS[get_day_from_period(start_time)]][start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)] is not None):
+                        ind += 1
+                        continue 
+
+                if found:                
+                    for group_index in classs.groups:
+                        # add order of the subjects for group
+                        insert_order(subjects_order, classs.subject, group_index, classs.type, start_time)
+                        # add times of the class for group
+                        for i in range(int(classs.duration)):
+                            groups_empty_space[group_index].append(i + start_time)
+            
+
+                    for i in range(int(classs.duration)):
+                        filled.setdefault(index, []).append((i + start_time, start_field[1]))        # add to filled
+                        free.remove((i + start_time, start_field[1]))                                # remove from free
+                        # add times of the class for teachers
+                        teachers_empty_space[classs.teacher].append(i + start_time)
+                        
+                        teacher_matrix[data.classes[index].teacher][DAYS[get_day_from_period(i + start_time)]][i + start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)] = {
+                            "Section": data.classes[index].classrooms,
+                            "Subject": data.classes[index].subject
+                        }
+                        
+                        section_matrix[data.classrooms[start_field[1]].name][DAYS[get_day_from_period(i + start_time)]][i + start_time - (math.floor(start_time/NUMBER_OF_PERIODS)*NUMBER_OF_PERIODS)] = {
+                            "Subject": data.classes[index].subject,
+                            "Teacher": data.classes[index].teacher
+                        }
+                        
+                    break
     
     # fill the matrix
     for index, fields_list in filled.items():
@@ -135,6 +185,8 @@ def initial_population(data, matrix, free, filled, groups_empty_space, teachers_
             matrix[field[0]][field[1]] = index
             
     show_timetable(matrix, data)
+    
+    return free
                  
 
 
@@ -333,12 +385,16 @@ def simulated_hardening(matrix, data, free, filled, groups_empty_space, teachers
     """
     # number of iterations
     # KEYWORD: ITERATION, REPETITION
-    iter_count = 1000
+    iter_count = 0
     # temperature
     t = 0.5
     _, _, curr_cost_group = empty_space_groups_cost(groups_empty_space)
     _, _, curr_cost_teachers = empty_space_teachers_cost(teachers_empty_space)
-    curr_cost = curr_cost_group  + curr_cost_teachers
+    curr_cost_teacher_consecutive = no_consecutive_class(data, filled)
+    curr_cost_separate_laboratory = separate_laboratory(data, matrix)
+    curr_cost_mathsci_before_lunch = mathsci_before_lunch(data, matrix)
+    curr_cost_empty_slots = balance_dismissal(data, matrix)
+    curr_cost = curr_cost_teachers + curr_cost_teacher_consecutive + curr_cost_separate_laboratory + curr_cost_empty_slots + curr_cost_mathsci_before_lunch
     if free_hour(matrix) == -1:
         curr_cost += 1
 
@@ -364,8 +420,9 @@ def simulated_hardening(matrix, data, free, filled, groups_empty_space, teachers
         new_cost_teacher_consecutive = no_consecutive_class(data, filled)
         new_cost_separate_laboratory = separate_laboratory(data, matrix)
         new_cost_mathsci_before_lunch = mathsci_before_lunch(data, matrix)
+        new_cost_empty_slots = balance_dismissal(data, matrix)
         
-        new_cost = new_cost_groups + new_cost_teacher_consecutive + new_cost_separate_laboratory + new_cost_mathsci_before_lunch # + new_cost_teachers
+        new_cost = new_cost_teachers + new_cost_teacher_consecutive + new_cost_separate_laboratory + new_cost_mathsci_before_lunch + new_cost_empty_slots # + new_cost_teachers
         if free_hour(matrix) == -1:
             new_cost += 1
 
@@ -412,15 +469,18 @@ def main():
 
     data = load_data(file, teachers_empty_space, groups_empty_space, subjects_order)
     matrix, free = set_up(len(data.classrooms))
-    initial_population(data, matrix, free, filled, groups_empty_space, teachers_empty_space, subjects_order)
+    new_free = convert_free(data, free)
+    print(new_free)
+    new_free = initial_population(data, matrix, new_free, filled, groups_empty_space, teachers_empty_space, subjects_order)
+
 
     total, _, _, _, _ = hard_constraints_cost(matrix, data, filled)
     print('Initial cost of hard constraints: {}'.format(total))
 
-    evolutionary_algorithm(matrix, data, free, filled, groups_empty_space, teachers_empty_space, subjects_order)
+    evolutionary_algorithm(matrix, data, new_free, filled, groups_empty_space, teachers_empty_space, subjects_order)
     print('STATISTICS')
     show_statistics(matrix, data, subjects_order, groups_empty_space, teachers_empty_space, filled)
-    simulated_hardening(matrix, data, free, filled, groups_empty_space, teachers_empty_space, subjects_order, file)
+    simulated_hardening(matrix, data, new_free, filled, groups_empty_space, teachers_empty_space, subjects_order, file)
     show_timetable(matrix, data)
     debug_check(data, matrix, filled)
 

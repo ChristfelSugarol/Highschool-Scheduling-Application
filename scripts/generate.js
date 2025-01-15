@@ -317,7 +317,24 @@ function convertion() {
         final_object.Subject_Availability.push(object_pkg)
     })
 
-    write_input_to_file(JSON.stringify(final_object, null, 2))
+    write_input_to_file(JSON.stringify(fixed_schedule_casovi_post_process(final_object, null, 2)))
+}
+
+function fixed_schedule_casovi_post_process(data){
+    fixed_arr = []
+    rest_arr = []
+
+    for (let i = 0; i < data["Casovi"].length; i++){
+        if (data["Casovi"][i].Definite == null){
+            fixed_arr.push(data["Casovi"][i])
+        } else {
+            rest_arr.push(data["Casovi"][i])
+        }
+    }
+    
+    data["Casovi"] = rest_arr.concat(fixed_arr)
+
+    return data
 }
 
 function printRawData(){
