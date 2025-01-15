@@ -1,3 +1,45 @@
+function setNestedMapValue(map, key1, key2, key3, value) {
+    // Check and initialize the first layer
+    if (!map.has(key1)) {
+        map.set(key1, new Map());
+    }
+
+    // Get the first layer map
+    const firstLayer = map.get(key1);
+
+    // Check and initialize the second layer
+    if (!firstLayer.has(key2)) {
+        firstLayer.set(key2, new Map());
+    }
+
+    // Get the second layer map
+    const secondLayer = firstLayer.get(key2);
+
+    // Set the value in the third layer
+    secondLayer.set(key3, value);
+}
+
+function setNestedMapValue(map, key1, key2, key3, value) {
+    // Check and initialize the first layer
+    if (!map.has(key1)) {
+        map.set(key1, new Map());
+    }
+
+    // Get the first layer map
+    const firstLayer = map.get(key1);
+
+    // Check and initialize the second layer
+    if (!firstLayer.has(key2)) {
+        firstLayer.set(key2, new Map());
+    }
+
+    // Get the second layer map
+    const secondLayer = firstLayer.get(key2);
+
+    // Set the value in the third layer
+    secondLayer.set(key3, value);
+}
+
 function renderSchedules(data, maptype) {
     let html = '';
     data.forEach((item, id) => {
@@ -66,6 +108,7 @@ function renderSchedules(data, maptype) {
 function post_process(){
     //Iterate through tables
 
+    /*
     for (var i = 0; i < document.getElementById("dataTable").children.length; i++){
         let table_name = document.getElementById("dataTable").children[i].querySelector(':nth-child(2)')
 
@@ -102,6 +145,75 @@ function post_process(){
             
         }
     }
+
+    */
+    const HTMLarr = new Map()
+    console.log("Post-Process")
+
+    //Setting map data structure
+    for (var i = 0; i < document.getElementById("dataTable").children.length; i++){
+        let table_name = document.getElementById("dataTable").children[i].querySelector(':nth-child(2)')
+        //Starts at two because of initial header and day header
+        for (var j = 2  ; j < 15; j++){  
+            //Starts at one because of the initial column for time
+            for (var k = 1; k < 6; k++){
+                try {
+                    let curr = table_name.children[j].children[k]
+                    setNestedMapValue(HTMLarr, i, k, j, curr);         
+                } catch (e){
+                    console.log(e)
+                }
+            }         
+        }
+    }
+
+    //Post processing
+    for (var i = 0; i < document.getElementById("dataTable").children.length; i++){
+        console.log("T")
+        
+        for (var j = 1; j < 6; j++){
+            let k = 2
+
+            while (k < 14){
+                curr = HTMLarr.get(i).get(j).get(k)
+                next =  HTMLarr.get(i).get(j).get(k+1)
+                
+
+                if (!curr.textContent.includes("102106")){
+                    if (curr.textContent == next.textContent){
+
+                        if (k < 13){
+                            next2 = HTMLarr.get(i).get(j).get(k+2)
+                            if (curr.textContent == next2.textContent){
+                                curr.rowSpan = "3"
+                                next.remove()
+                                next2.remove()
+                            } else {
+                                curr.rowSpan = "2"
+                                next.remove()
+                            }
+                        } else {
+                            cur.rowSpan = "2"
+                            next.remove()
+                        }
+              
+                        k++
+
+                    }
+                }
+
+
+
+
+
+                k++
+                
+            }
+        }  
+    
+    }
+
+    console.log(HTMLarr)
 
     //document.getElementById("dataTable").children[0].querySelector(':nth-child(2)').children[6].children[1]
 }
