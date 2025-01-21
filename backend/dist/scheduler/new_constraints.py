@@ -36,7 +36,7 @@ def no_consecutive_class(data, filled):
 
     for teacher_timetable in teacher_list:
         for day in teacher_timetable:
-            c1 = 0 # if c1 = 3, cost starts to go up
+            c1 = CONSECUTIVE_CLASS_LIMIT # if c1 = 3, cost starts to go up
             c2 = 0 # 0.5 cost per c2
             
             for i in range(len(day)):

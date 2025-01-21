@@ -91,6 +91,15 @@ function runBackEnd(data) {
         const childPython = spawn('python', ['backend/dist/scheduler/scheduler.py'])
         let fullOutput = '';
 
+        const input_data = {
+            schedule_data: JSON.stringify(data),
+            CONSECUTIVE_CLASS_LIMIT: 3,
+            NO_CONSECUTIVE_CLASS_COST_MULTIPLIER: 0.5,
+            NO_OVERLAPING_LABORATORY_CLASSES_MULTIPLIER: 0.5,
+            NO_MATH_SCIENCE_AFTER_LUNCH_MULTIPLIER: 0.25,
+            EMPTY_SLOTS_BETWEEN_POWER: 3
+        }
+
         childPython.stdin.write(JSON.stringify(data));
         childPython.stdin.end();
 
