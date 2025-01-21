@@ -6,10 +6,12 @@ from costs import check_hard_constraints, hard_constraints_cost, empty_space_gro
 import copy
 import math
 from constants import *
+import constants
 from utils2 import *
 from hard_constraints import *
 from new_constraints import *
 import sys
+import json
 
 def convert_free(data, free):
 
@@ -445,6 +447,11 @@ def simulated_hardening(matrix, data, free, filled, groups_empty_space, teachers
     print('STATISTICS AFTER HARDENING')
     show_statistics(matrix, data, subjects_order, groups_empty_space, teachers_empty_space, filled)
 
+CONSECUTIVE_CLASS_LIMIT = 3
+NO_CONSECUTIVE_CLASS_COST_MULTIPLIER = 0.5
+NO_OVERLAPING_LABORATORY_CLASSES_MULTIPLIER = 0.25
+NO_MATH_SCIENCE_AFTER_LUNCH_MULTIPLIER = 0.25
+EMPTY_SLOTS_BETWEEN_POWER = 3
 
 def main():
     """
@@ -465,8 +472,21 @@ def main():
     subjects_order = {}
     groups_empty_space = {}
     teachers_empty_space = {}
-    file = sys_in.splitlines()[0]
+    file = json.dumps(json.loads(sys_in.splitlines()[0])['schedule_data'])
+    
+    CONSECUTIVE_CLASS_LIMIT = json.loads(sys_in.splitlines()[0])['CONSECUTIVE_CLASS_LIMIT']
+    NO_CONSECUTIVE_CLASS_COST_MULTIPLIER = json.loads(sys_in.splitlines()[0])['NO_CONSECUTIVE_CLASS_COST_MULTIPLIER']
+    NO_OVERLAPING_LABORATORY_CLASSES_MULTIPLIER = json.loads(sys_in.splitlines()[0])['NO_OVERLAPING_LABORATORY_CLASSES_MULTIPLIER']
+    NO_MATH_SCIENCE_AFTER_LUNCH_MULTIPLIER = json.loads(sys_in.splitlines()[0])['NO_MATH_SCIENCE_AFTER_LUNCH_MULTIPLIER']
+    EMPTY_SLOTS_BETWEEN_POWER = json.loads(sys_in.splitlines()[0])['EMPTY_SLOTS_BETWEEN_POWER']
 
+    constants.CONSECUTIVE_CLASS_LIMIT = CONSECUTIVE_CLASS_LIMIT
+    constants.NO_CONSECUTIVE_CLASS_COST_MULTIPLIER = NO_CONSECUTIVE_CLASS_COST_MULTIPLIER
+    constants.NO_OVERLAPING_LABORATORY_CLASSES_MULTIPLIER = NO_OVERLAPING_LABORATORY_CLASSES_MULTIPLIER
+    constants.NO_MATH_SCIENCE_AFTER_LUNCH_MULTIPLIER = NO_MATH_SCIENCE_AFTER_LUNCH_MULTIPLIER
+    constants.EMPTY_SLOTS_BETWEEN_POWER = EMPTY_SLOTS_BETWEEN_POWER
+
+    
     data = load_data(file, teachers_empty_space, groups_empty_space, subjects_order)
     matrix, free = set_up(len(data.classrooms))
     new_free = convert_free(data, free)
@@ -483,7 +503,6 @@ def main():
     simulated_hardening(matrix, data, new_free, filled, groups_empty_space, teachers_empty_space, subjects_order, file)
     show_timetable(matrix, data)
     debug_check(data, matrix, filled)
-
 
 if __name__ == '__main__':
     print("testing")
