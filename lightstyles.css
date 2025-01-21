@@ -9,7 +9,6 @@
 
 .light-mode .modal-content{
     background-color: whitesmoke;
-
 }
 
 .light-mode input {
@@ -29,4 +28,8 @@
 .light-mode footer {
     background-color: darkgrey;
     color: black;
+}
+
+.light-mode #option-container {
+    background-color: white
 }
