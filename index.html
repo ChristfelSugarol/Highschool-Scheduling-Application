@@ -6,6 +6,7 @@
     <title>School Management System</title>
     <script src="jquery-3.7.1.min.js"></script>
     <script src="scripts/constant.js"></script>
+    <script src="scripts/options_function.js"></script>
     <script src="scripts/generate.js"></script>
     <script src="scripts/script.js"></script>
     <script src="scripts/linker.js"></script>
@@ -24,6 +25,55 @@
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
 <body>
+    <div id="option-block" style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; position: absolute; display:none">
+        <div id="option-container" style="width: 500px; height: 500px;  position: absolute; background-color: #2c2c2c; z-index: 2;">
+            <div style="position: relative; height: 50px;">
+                <p style="position: absolute; top:4px; left:13px">Options</p>
+                <button onclick="load_old_options()" style="position: absolute; padding: 10px; right: 15px; top:7px">×</button>
+            </div>
+            
+            <fieldset style="position:relative; height: 60px">
+                <div style="display: flex; align-items: center; gap: 5px; position: absolute; height: 60px;" class="tooltip">
+                    <p style="position:absolute; width: 200px;">Consecutive Class Limit</p>
+                    <input style="position: absolute; left: 270px; width: 200px;" type="number" id="class_limit" placeholder="Default: 3"  value=3 required>
+                    <span  class="tooltiptextnormal">Number of consecutive periods of classes a teacher can have before it is too much for the algorithm</span>
+                </div>
+            </fieldset>
+            <fieldset style="position:relative; height: 60px">
+                <div style="display: flex; align-items: center; gap: 5px; position: absolute; height: 60px;;" class="tooltip">
+                    <p style="position:absolute; width: 200px;">Consecutive Class multiplier</p>
+                    <input style="position: absolute; left: 270px; width: 200px;" type="number" id="class_limit_multiplier" placeholder="Default: 0.5"  value=0.5 required>
+                    <span class="tooltiptextnormal">Weight multiplier for how costly it is to exceed the class limit </span>
+                </div>
+            </fieldset>
+            <fieldset style="position:relative; height: 60px">
+                <div style="display: flex; align-items: center; gap: 5px; position: absolute; height: 60px;" class="tooltip">
+                    <p style="position:absolute; width: 200px;">Overlapping Laboratory class multiplier</p>
+                    <input style="position: absolute; left: 270px; width: 200px;" type="number" id="laboratory_class_multiplier" placeholder="Default: 0.25"  value=0.25 required>
+                    <span class="tooltiptextnormal">Weight multiplier for how costly it is for subjects with the same laboratory to be on the same timeslot</span>
+                </div>  
+            </fieldset>
+            <fieldset style="position:relative; height: 60px">
+                <div style="display: flex; align-items: center; gap: 5px; position: absolute; height: 60px;" class="tooltip">
+                    <p style="position:absolute; width: 200px;">MathSci subjects after lunch multiplier</p>
+                    <input style="position: absolute; left: 270px; width: 200px;" type="number" id="after_lunch_multiplier" placeholder="Default: 0.25" value=0.25 required>
+                    <span class="tooltiptextnormal">Weight multiplier for how costly it is for MathSci subjects to be after a section's lunch break</span>
+                </div>
+            </fieldset>
+            <fieldset style="position:relative; height: 60px">
+                <div style="display: flex; align-items: center; gap: 5px; position: absolute; height: 60px;" class="tooltip">
+                    <p style="position:absolute; width: 200px;">Empty Slots between multiplier</p>
+                    <input style="position: absolute; left: 270px; width: 200px;" type="number" id="empty_slots_multiplier" placeholder="Default: 3"  value=3 required>
+                    <span class="tooltiptextnormal">Weight exponential multiplier for how costly it is for a free timeslot before a dismissal</span>
+                </div>
+            </fieldset>
+            <button style="position: absolute; right: 15px;" onclick="giveParsedInputData('This')">Save</button>
+        </div>
+    </div>
+    
+    <div id="black-screen" style="width: 100%; height: 100%; position: absolute; background-color: black; opacity: 0.7; display:none">
+
+    </div>
     <header>
         <nav id="menubar">
             <ul>
@@ -31,7 +81,7 @@
                 <button onclick="selectFile()"><img src="icons/Open.png" alt="description" height="40px"></button>
                 <button onclick="saveOnCurrent()"><img src="icons/Save.png" alt="description" height="40px"></button>
                 <button onclick="saveCustomFile()"><img src="icons/Save_As.png" alt="description" height="40px"></button>
-                <button><img src="icons/Options.png" alt="description" height="40px"></button>
+                <button onclick="openOptionsMenu()"><img src="icons/Options.png" alt="description" height="40px"></button>
             </ul>
             <div id="filenameDisplay">
                 Untitled
@@ -364,7 +414,102 @@
                     laboratory = `${item.get("laboratory").get("room")}`
                 }
 
-                html += newRow(item, id, index++) + `<td>${item.get("teachers").join(', ')}</td><td>${item.get("section").join(',  ')}</td><td>${type}</td><td>${laboratory}</td><td>S: ${periods.get("single")}, D: ${periods.get("double")}, T: ${periods.get("triple")}</td><td class="availability">`;
+
+
+                var periodString = ""
+                if (item.get('has_definite_schedule') == true){
+                    var table_element = document.createElement("table");
+                    table_element.style.borderCollapse = "collapse";
+                    table_element.style.width = "100%";
+                    table_element.style.textAlign = "center";
+                    
+                    // Loop to create rows and columns
+                    const rows = 13
+                    const cols = 5
+
+                    var fixed_map = new Map()
+
+                    var map_iter = 0
+                    for (const [key, value] of item.get('definite_schedule').entries()) {
+                        var inside_map = new Map()
+
+                        for (let a = 0; a < value.get('duration'); a++){
+                            var initial_pos = value.get('start') + a
+                            inside_map.set(initial_pos, "Something")
+                        }
+
+                        fixed_map.set(map_iter, inside_map)
+
+                        map_iter++
+                    }
+
+                    console.log(fixed_map)
+
+                    {
+                        var row = document.createElement("tr");
+
+                        // Create empty corner cell
+
+                        var cell = document.createElement("td");
+                        cell.style.border = "1px solid black";
+                        cell.style.padding = "8px";
+                        cell.textContent = ``
+                        row.appendChild(cell);
+
+                        
+                        for (var j = 0; j < cols; j++) {
+                            var cell = document.createElement("td");
+                            cell.style.border = "1px solid black";
+                            cell.style.padding = "8px";
+                            cell.textContent = weekdays[j]
+                            row.appendChild(cell);
+                        }
+
+                        table_element.appendChild(row);
+                    }
+
+                    for (var i = 0; i < rows; i++) {
+                        var row = document.createElement("tr");
+
+                        var cell = document.createElement("td");
+                        cell.style.border = "1px solid black";
+                        cell.style.padding = "8px";
+                        cell.textContent = TIMESLOT_LABEL[i]
+                        row.appendChild(cell);
+                        
+                        for (var j = 0; j < cols; j++) {
+                            var cell = document.createElement("td");
+                            cell.style.border = "1px solid black";
+                            cell.style.padding = "8px";
+
+                            try{
+                                if (fixed_map.get(j).get(i) == 'Something'){
+                                cell.style.backgroundColor = "green"
+                                } else {
+                                    cell.style.backgroundColor = "red"
+                                }
+                            } catch (e){
+
+                            }
+
+
+                            
+                            cell.textContent = ``
+                            row.appendChild(cell);
+                        }
+                        
+                        table_element.appendChild(row);
+                    }
+
+                    var table_sample = table_element.outerHTML
+
+                    periodString = `<div class="tooltip">Fixed Schedule <span class="tooltiptext">${table_sample}</span></div>`
+                } else {
+                    periodString = `S: ${periods.get("single")}, D: ${periods.get("double")}, T: ${periods.get("triple")}`
+                }
+
+
+                html += newRow(item, id, index++) + `<td>${item.get("teachers").join(', ')}</td><td>${item.get("section").join(',  ')}</td><td>${type}</td><td>${laboratory}</td><td>${periodString}</td><td class="availability">`;
                 const availability = item.get("availability");
                 ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
                     html += `<span class="${availability.get(day) ? 'available' : 'unavailable'}">${day[0].toUpperCase()}</span>`;
@@ -394,18 +539,23 @@
             return html
         }
 
+        var active_inter_btn = ""
+
         async function renderTable() {        // Contains headers and render calls
             const tableContainer = document.getElementById('dataTable');
             let html = '';
             let buttonInteractions = document.getElementById('buttonInteractions')
+            var interaction_main = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
 
+
+            
             switch(currentTab) {
                 case 'teachers':
                     document.getElementById('schedulebar').style.display = "none"
                     document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th><th>Availability</th></tr>';
                     html += await renderTeachers(teachers) + '</table>';
-                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    buttonInteractions.innerHTML = interaction_main
                     break;
 
                 case 'subjects':
@@ -413,7 +563,7 @@
                     document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Teachers</th><th>Section</th><th>Type</th><th>Laboratory</th><th>Periods</th><th>Availability</th></tr>';
                     html +=  await renderSubjects(subjects) + '</table>';
-                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    buttonInteractions.innerHTML = interaction_main
                     break;
 
                 case 'laboratories':
@@ -421,7 +571,7 @@
                     document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th></tr>';
                     html += await renderLaboratories(laboratories) + '</table>';
-                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    buttonInteractions.innerHTML = interaction_main
                     break;
 
                 case 'sections':
@@ -429,7 +579,7 @@
                     document.getElementById("swapBarMain").style.display = "none"
                     html += '<table style="table-layout:auto"><tr><th>#</th><th>ID</th><th>Name</th><th>Subjects</th></tr>';
                     html += await renderSections(sections) + '</table>';
-                    buttonInteractions.innerHTML = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+                    buttonInteractions.innerHTML = interaction_main
                     break;
 
                 case 'schedules':
@@ -460,6 +610,14 @@
             }
             tableContainer.innerHTML = html;
             verifyConflicts();
+
+            
+            if (currentTab != 'schedules'){
+                if (active_inter_btn != ""){
+                    interaction(active_inter_btn, false)
+                }
+            }
+
             if (currentTab == "schedules"){
                 try{post_process()}catch(e){}       
             } else {
@@ -605,7 +763,7 @@
             primaryActiveCells: new Set(),
             additionalActiveCells: new Set()
         };
-        const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
 
         // Utility Functions
         function clearColumnCells(col) {
@@ -825,17 +983,16 @@
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
-        function interaction(user_in) {
+        var active_inter_btn = ""
+
+        function interaction(user_in, mode = true) {
             const entry_buttons = document.getElementsByClassName('entry_button');
             const entry_nums = document.getElementsByClassName('entry_number');
 
-            if (user_in == "default" && activeButton == ""){
-                return
-            }
-
-            if (activeButton === user_in) {
+            if ((activeButton === user_in) && mode) {
                 document.getElementById(user_in).style.backgroundColor = "#3b82f6";
                 activeButton = "";
+                active_inter_btn = ""
 
                 for (let i = 0; i < entry_buttons.length; i++) {
                     entry_buttons[i].style.display = "none";
@@ -846,11 +1003,9 @@
                     document.getElementById(activeButton).style.backgroundColor = "#3b82f6";
                 }
 
-                if (user_in != "default"){
-                    activeButton = user_in;
-                }
-                document.getElementById(activeButton).style.backgroundColor = "red";
-                
+                document.getElementById(user_in).style.backgroundColor = "red";
+                activeButton = user_in;
+                active_inter_btn = user_in
 
                 for (let i = 0; i < entry_buttons.length; i++) {
                     entry_nums[i].style.display = "none";

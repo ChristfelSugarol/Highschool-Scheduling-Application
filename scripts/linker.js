@@ -91,7 +91,9 @@ function runBackEnd(data) {
         const childPython = spawn('python', ['backend/dist/scheduler/scheduler.py'])
         let fullOutput = '';
 
-        childPython.stdin.write(JSON.stringify(data));
+        const input_data = readOptionsData(data);
+
+        childPython.stdin.write(JSON.stringify(input_data));
         childPython.stdin.end();
 
         // Handle each line of output in real-time

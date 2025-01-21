@@ -169,9 +169,11 @@ def hard_constraints_cost(matrix, data, filled):
                 # check if teacher is NOT available on that day
                 if data.teacher_availability[c1.teacher][get_day_from_period(i)] == 0:
                     cost_teacher += 1
+                    cost_class[field] += 1
                     
                 if data.subject_availability[c1.subject][get_day_from_period(i)] == 0:
                     cost_classrooms += 1
+                    cost_class[field] += 1
 
                 # calculate loss for classroom
                 if j not in c1.classrooms:
