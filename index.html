@@ -21,8 +21,10 @@
     <script src="data.js"></script>
     <script src="scripts/edit-patches.js"></script>
     <script src="scripts/listener.js"></script>
+    <script src="scripts/lightmodetoggle.js"></script>
     
     <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <link rel="stylesheet" type="text/css" href="lightstyles.css"/>
 </head>
 <body>
     <div id="option-block" style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; position: absolute; display:none">
@@ -84,6 +86,7 @@
                 <button onclick="openOptionsMenu()"><img src="icons/Options.png" alt="description" height="40px"></button>
             </ul>
             <div id="filenameDisplay">
+                <button onclick="toggleLightMode()">Toggle light mode</button>
                 Untitled
             </div>
         </nav>

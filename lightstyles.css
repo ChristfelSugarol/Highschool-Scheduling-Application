@@ -1,0 +1,32 @@
+.light-mode {
+    background-color: whitesmoke;
+    color: black;
+}
+
+.light-mode th {
+    background-color: whitesmoke;
+}
+
+.light-mode .modal-content{
+    background-color: whitesmoke;
+
+}
+
+.light-mode input {
+    background-color: white;
+    color: black;
+}
+
+.light-mode .dropdown-list {
+    background-color: lightgrey;
+}
+
+.light-mode .dropdown-list label {
+    background-color: darkgrey;
+    color: black;
+}
+
+.light-mode footer {
+    background-color: darkgrey;
+    color: black;
+}

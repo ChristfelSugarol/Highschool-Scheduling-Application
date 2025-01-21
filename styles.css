@@ -369,7 +369,7 @@ input[type=checkbox]{
     transition-delay: 0s;
 }
   
-  .tooltip:hover .tooltiptext {
+.tooltip:hover .tooltiptext {
     visibility: visible;
     transition-delay: 0.3s;
 }
