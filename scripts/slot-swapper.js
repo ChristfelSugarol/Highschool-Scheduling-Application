@@ -138,6 +138,9 @@ function selectSlot(button){
 function swapSchedules(){
     if (selection[1]["slots"].length == selection[2]["slots"].length){
 
+        console.log(selection[1]["slots"])
+        console.log(selection[2]["slots"])
+
         selection[1]["slots"].sort()
         selection[2]["slots"].sort()
         var tempSlots = []
@@ -177,28 +180,69 @@ function swapSchedules(){
 
 function verifyConflicts(){
     //Iterate through every single slot in teachers
-    /*teacher_schedules.forEach((item1_obj, item1) => {
+    
+    teacher_schedules.forEach((item1_obj, item1) => {
+        if(!item1.includes("PecsonSugarolSirilanKeyword")){
         item1_obj.forEach((day1_obj, day1) => {
             day1_obj.forEach((slot1_obj, slot1) => {
                 if (slot1_obj != "None"){
 
-                    //Compare the current slot to every other slot in teachers
+                    if(currentSchedule == "teachers") {
+                    //Check if two teachers are in the same section at the same slot
                     teacher_schedules.forEach((item2_obj, item2) => {
+                        if(!item2.includes("PecsonSugarolSirilanKeyword")){
                         if (item2_obj != item1_obj){
                             item2_obj.forEach((day2_obj, day2) => {
-                                day1_obj.forEach((slot2_obj, slot2) => {
+                                day2_obj.forEach((slot2_obj, slot2) => {
                                     if (slot2_obj != "None"){
                                         if (slot1_obj.get("Section") == slot2_obj.get("Section")){
-                                            document.querySelector(`[data-slotid=teacher_schedules${item1}${day1}${slot1}]`).style.backgroundColor = "#FF0000";
-                                            document.querySelector(`[data-slotid=teacher_schedules${item2}${day2}${slot2}]`).style.backgroundColor = "#FF0000";
+                                            document.querySelector(`[data-slotid="teacher_schedules${item1}${day1}${slot1}"]`).style.backgroundColor = "#FF0000";
+                                            document.querySelector(`[data-slotid="teacher_schedules${item2}${day2}${slot2}"]`).style.backgroundColor = "#FF0000";
                                         } } }) }) }
-                    })
+                    }})}
 
-                    section_schedules
+                    //Check if there is a mismatch between teacher schedules and section schedules
+                    section_schedules.forEach((item2_obj, item2) => {
+                        if (!item2.includes("PecsonSugarolSirilanKeyword")){
+                            item2_obj.forEach((day2_obj, day2) => {
+                                day2_obj.forEach((slot2_obj, slot2) => {
+                                    if (slot2_obj != "None"){
+                                        if(slot1_obj.get("Teacher") && slot2_obj.get("Teacher")){
+                                        if (((slot1_obj.get("Teacher") != slot2_obj.get("Teacher")) && (!slot1_obj.get("Teacher").includes("PecsonSugarolSirilanKeyword") && !slot2_obj.get("Teacher").includes("PecsonSugarolSirilanKeyword")))){
+                                            console.log("fum")
+                                            if(currentSchedule == "teachers") {
+                                                document.querySelector(`[data-slotid="teacher_schedules${item1}${day1}${slot1}"]`).style.backgroundColor = "#FF0000";
+                                            }
+                                            else{
+                                                document.querySelector(`[data-slotid="section_schedules${item2}${day2}${slot2}"]`).style.backgroundColor = "#FF0000";
+                                            }       
+                        }} } }) }) }
+                    })
                 }
             })
         })
-    })*/
+    }})
+    // Check if two sections share the same teacher in the same slot
+    if (currentSchedule == "sections"){
+    section_schedules.forEach((item1_obj, item1) => {
+        if(!item1.includes("PecsonSugarolSirilanKeyword")){
+        item1_obj.forEach((day1_obj, day1) => {
+            day1_obj.forEach((slot1_obj, slot1) => {
+                if (slot1_obj != "None"){
+                    section_schedules.forEach((item2_obj, item2) => {
+                        if (!item2.includes("PecsonSugarolSirilanKeyword")){
+                            item2_obj.forEach((day2_obj, day2) => {
+                                day2_obj.forEach((slot2_obj, slot2) => {
+                                    if (slot2_obj != "None"){
+                                    if(slot1_obj.get("Teacher") && slot2_obj.get("Teacher")){
+                                    if((slot1_obj.get("Teacher") != slot2_obj.get("Teacher")) && (!slot1_obj.get("Teacher").includes("PecsonSugarolSirilanKeyword") && !slot2_obj.get("Teacher").includes("PecsonSugarolSirilanKeyword"))){
+                                        document.querySelector(`[data-slotid=section_schedules${item1}${day1}${slot1}]`).style.backgroundColor = "#FF0000";
+                                        document.querySelector(`[data-slotid=section_schedules${item2}${day2}${slot2}]`).style.backgroundColor = "#FF0000";
+                                    }}
+                    } }) }) }}) }
+                })
+        })}})}
+        
 }
 
 function returnToSwapBarMain(){

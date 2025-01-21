@@ -454,15 +454,14 @@
                     if (has_schedule == true){
                         buttonInteractions.innerHTML = '<button onclick="export_pdf()" id = "export_button" style="margin: 2px;">Export</button>' + buttonInteractions.innerHTML
                         buttonInteractions.innerHTML = '<button onclick="clear_schedule()" id = "clear_export_btn">Clear</button>' + buttonInteractions.innerHTML
-                        verifyConflicts()
+                        
                     } 
-
                     break;
             }
             tableContainer.innerHTML = html;
-            
+            verifyConflicts();
             if (currentTab == "schedules"){
-                try{post_process()}catch(e){}        
+                try{post_process()}catch(e){}       
             } else {
                 interaction("default")
             }
