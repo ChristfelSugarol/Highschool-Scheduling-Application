@@ -95,8 +95,8 @@ async function merge_pdf(){
   const filePath = ""
   const teacherFolder = "teacher_individual_scheds/"
   const sectionFolder = "section_individual_scheds/"
-  merge_pdfs(filePath + teacherFolder, "output/", "teachers.pdf")
-  merge_pdfs(filePath + sectionFolder, "output/", "sections.pdf")
+  mergePDFs(filePath + teacherFolder, "output/teachers.pdf")
+  mergePDFs(filePath + sectionFolder, "output/sections.pdf")
 }
 
 async function export_pdf(){
