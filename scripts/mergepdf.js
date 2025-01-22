@@ -26,4 +26,10 @@ async function mergePDFs(directoryPath, outputFilePath) {
   } catch (error) {
     console.error("An error occurred while merging PDFs:", error);
   }
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve("Data fetched successfully!");
+    }, 2000);
+  });
 }

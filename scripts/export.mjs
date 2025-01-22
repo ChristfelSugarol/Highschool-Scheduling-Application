@@ -100,13 +100,32 @@ async function merge_pdf(){
 
   createDirectoryIfNotExistsSync('output')
 
-  mergePDFs(filePath + teacherFolder, "output/teachers.pdf")
-  mergePDFs(filePath + sectionFolder, "output/sections.pdf")
+  await mergePDFs(filePath + teacherFolder, "output/teachers.pdf")
+  await mergePDFs(filePath + sectionFolder, "output/sections.pdf")
+}
+
+
+function deleteFolder(folderPath) {
+  fs.rm(folderPath, { recursive: true, force: true }, (err) => {
+    if (err) {
+      console.error(`Error deleting folder "${folderPath}":`, err);
+    } else {
+      console.log(`Folder "${folderPath}" deleted successfully!`);
+    }
+  });
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve("Data fetched successfully!");
+    }, 2000);
+  });
 }
 
 async function export_pdf(){
   await export_indpdf()
   await merge_pdf()
+  await deleteFolder('teacher_individual_scheds/')
+  await deleteFolder('section_individual_scheds/')
 }
 
 function export_interaction(){
