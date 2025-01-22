@@ -48,9 +48,6 @@ def initial_population(data, matrix, free, filled, groups_empty_space, teachers_
     section_matrix = intialize_matrix(section_names, {})
 
     for index, classs in classes.items():
-        print(classs.subject)
-
-    for index, classs in classes.items():
         
 
         ind = 0
@@ -63,7 +60,6 @@ def initial_population(data, matrix, free, filled, groups_empty_space, teachers_
             # What the heck does this thing do?
             for a in free:
 
-                print("({}, {}) and {}".format(class_pos, class_num, a))
                 if class_pos == a[0] and class_num == a[1]: 
                     ind = it
                     break
@@ -71,7 +67,6 @@ def initial_population(data, matrix, free, filled, groups_empty_space, teachers_
                 it += 1
 
             start_field = free[ind]
-            print("Start Field {}".format(start_field))
             
             # check if class won't start one day and end on the next
             start_time = start_field[0]
@@ -322,7 +317,7 @@ def evolutionary_algorithm(matrix, data, free, filled, groups_empty_space, teach
     It uses (1+1) evolutionary strategy with Stifel's notation.
     """
     n = 3
-    sigma = 2
+    sigma = 0.7
     run_times = 5
     max_stagnation = 200
 
@@ -350,13 +345,13 @@ def evolutionary_algorithm(matrix, data, free, filled, groups_empty_space, teach
                 if random.uniform(0, 1) < sigma and costs_list[i][1] != 0:
                     mutate_ideal_spot(matrix, data, costs_list[i][0], free, filled, groups_empty_space,
                                       teachers_empty_space, subjects_order)
-                # else:
+                else:
                 #     # exchange two who have the same duration
-                #     r = random.randrange(len(costs_list))
-                #     c1 = data.classes[costs_list[i][0]]
-                #     c2 = data.classes[costs_list[r][0]]
-                #     if r != i and costs_list[r][1] != 0 and costs_list[i][1] != 0 and c1.duration == c2.duration:
-                #         exchange_two(matrix, filled, costs_list[i][0], costs_list[r][0])
+                    r = random.randrange(len(costs_list))
+                    c1 = data.classes[costs_list[i][0]]
+                    c2 = data.classes[costs_list[r][0]]
+                    if r != i and costs_list[r][1] != 0 and costs_list[i][1] != 0 and c1.duration == c2.duration:
+                        exchange_two(matrix, filled, costs_list[i][0], costs_list[r][0])
 
             loss_after, _, _, _, _ = hard_constraints_cost(matrix, data, filled)
             if loss_after < loss_before:
@@ -387,7 +382,7 @@ def simulated_hardening(matrix, data, free, filled, groups_empty_space, teachers
     """
     # number of iterations
     # KEYWORD: ITERATION, REPETITION
-    iter_count = 0
+    iter_count = 1000
     # temperature
     t = 0.5
     _, _, curr_cost_group = empty_space_groups_cost(groups_empty_space)
@@ -440,10 +435,14 @@ def simulated_hardening(matrix, data, free, filled, groups_empty_space, teachers
             teachers_empty_space = copy.deepcopy(old_teachers_empty_space)
             subjects_order = copy.deepcopy(old_subjects_order)
         if i % 100 == 0:
-            print('Iteration: {:4d} | Average cost: {:0.8f}'.format(i, curr_cost))
+            print('Iteration: {:4d} | Average cost: {:0.8f} | {}'.format(i, curr_cost, new_cost),)
+            print('Teachers {:0.8f} | {:0.8f}'.format(curr_cost_teachers, new_cost_teachers))
+            print('Consecutive {:0.8f} | {:0.8f}'.format(curr_cost_teacher_consecutive, new_cost_teacher_consecutive),)
+            print('Laboratory {:0.8f} | {:0.8f}'.format(curr_cost_separate_laboratory, new_cost_separate_laboratory),)
+            print('MathSci {:0.8f} | {:0.8f}'.format(curr_cost_mathsci_before_lunch, new_cost_mathsci_before_lunch),)
+            print("Empty {:0.8f} | {:0.8f}".format(curr_cost_empty_slots, new_cost_empty_slots))
+            print("----------------------------------------------------")
 
-    print('TIMETABLE AFTER HARDENING')
-    show_timetable(matrix, data)
     print('STATISTICS AFTER HARDENING')
     show_statistics(matrix, data, subjects_order, groups_empty_space, teachers_empty_space, filled)
 
@@ -490,12 +489,11 @@ def main():
     data = load_data(file, teachers_empty_space, groups_empty_space, subjects_order)
     matrix, free = set_up(len(data.classrooms))
     new_free = convert_free(data, free)
-    print(new_free)
     new_free = initial_population(data, matrix, new_free, filled, groups_empty_space, teachers_empty_space, subjects_order)
 
 
     total, _, _, _, _ = hard_constraints_cost(matrix, data, filled)
-    print('Initial cost of hard constraints: {}'.format(total))
+    #   print('Initial cost of hard constraints: {}'.format(total))
 
     evolutionary_algorithm(matrix, data, new_free, filled, groups_empty_space, teachers_empty_space, subjects_order)
     print('STATISTICS')
@@ -505,5 +503,4 @@ def main():
     debug_check(data, matrix, filled)
 
 if __name__ == '__main__':
-    print("testing")
     main()

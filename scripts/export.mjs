@@ -21,6 +21,12 @@ async function generatePDFfromHTML(htmlContent, outputPath) {
   await page.setContent(htmlContent);
   await page.pdf(options);
   await browser.close();
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve("Data fetched successfully!");
+    }, 2000);
+  });
 }
 
 function createDirectoryIfNotExistsSync(dirPath) {
@@ -54,19 +60,10 @@ async function export_indpdf(){
     for (it = 0; it < document.getElementById("dataTable").children.length; it++){
       var htmlContent = htmlTableArr[it].outerHTML
 
-      htmlContent = htmlContent.replaceAll('color: #1a1a1a; padding:0.2rem;  margin: 0px', 'color: white; padding:0.2rem;  margin: 0px')
-
-
       var cssContent = await fs.promises.readFile('styles.css', 'utf8');
+      var lightContent = await fs.promises.readFile('lightstyles.css', 'utf8');
 
-      console.log(cssContent.includes("background-color: #1a1a1a;"))
-      cssContent = cssContent.replace("background-color: #1a1a1a;", "background-color: #white;")
-      console.log(cssContent.includes("background-color: #1a1a1a;"))
-      cssContent = cssContent.replace("color: #ffffff;", "color: black;")
-      cssContent = cssContent.replace("background-color: #2c2c2c", "background-color: white")
-      cssContent = cssContent.replace("background-color: #333333", "background-color: white")
-    
-      var dcs = "<!DOCTYPE html> <html><head><style>" + cssContent + "</style></head><body>" + htmlContent + "</body></html>"
+      var dcs = "<!DOCTYPE html> <html><head><style>" + cssContent + lightContent + "</style></head><body class='light-mode'>" + htmlContent + "</body></html>"
 
 
       var finalName
@@ -82,19 +79,27 @@ async function export_indpdf(){
         createDirectoryIfNotExistsSync(pdfroot)
       }
 
-      generatePDFfromHTML(dcs, finalName).then(() => console.log('PDF generated successfully')).catch(err => console.error('Error generating PDF:', err));
+      await generatePDFfromHTML(dcs, finalName).then(() => console.log('PDF generated successfully')).catch(err => console.error('Error generating PDF:', err));
     }
 
     
     currentSchedule = 'sections'
     await renderTable()
   }
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve("Data fetched successfully!");
+    }, 2000);
+  });
 }
 
 async function merge_pdf(){
   const filePath = ""
   const teacherFolder = "teacher_individual_scheds/"
   const sectionFolder = "section_individual_scheds/"
+
+  createDirectoryIfNotExistsSync('output')
+
   mergePDFs(filePath + teacherFolder, "output/teachers.pdf")
   mergePDFs(filePath + sectionFolder, "output/sections.pdf")
 }

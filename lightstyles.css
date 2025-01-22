@@ -31,13 +31,13 @@
 }
 
 .light-mode #option-container {
-    background-color: white
+    background-color: lightgrey
 }
 
 .light-mode .sched_h2 td{
-    background-color: white;
+    background-color: whitesmoke;
 }
 
 .light-mode .empty_schedule_cell {
-    color: white;
+    color: whitesmoke;
 }

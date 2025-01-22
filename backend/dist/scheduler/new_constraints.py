@@ -205,6 +205,8 @@ def balance_dismissal(data, matrix):
         # empty_arr = []
 
         for day_schedule in section_schedule.values():
+            
+
             dismissal_time = 12 # 13 slots - 1
             empty_between = 0
 
@@ -213,7 +215,10 @@ def balance_dismissal(data, matrix):
                 if (day_schedule[it] == None):
                     dismissal_time -= 1
                 else:
-                    break
+                    if "lunch" in day_schedule[it]['Subject'].lower() or "recess" in day_schedule[it]['Subject'].lower():
+                        dismissal_time -= 1 
+                    else:
+                        break
 
             #Check for empty slots before last subjcet
             for it in range(dismissal_time + 1):
@@ -221,7 +226,6 @@ def balance_dismissal(data, matrix):
                     empty_between += 1
 
             cost += (empty_between**EMPTY_SLOTS_BETWEEN_POWER)
-
             # print("Cost")
             # print(empty_between**EMPTY_SLOTS_BETWEEN_POWER)
 
