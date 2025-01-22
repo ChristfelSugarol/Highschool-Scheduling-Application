@@ -326,6 +326,10 @@ input[type=checkbox]{
     bottom: 0;
 }
 
+.empty_schedule_cell {
+    color: #1a1a1a;
+}
+
 /* Hover over div implementation */
 
 .tooltip {
@@ -347,7 +351,7 @@ input[type=checkbox]{
     position: absolute;
     z-index: 1;
     top: 100%;
-    left: -200%;
+    left: -300%;
     transition-property: visibility;
     transition-delay: 0s;
 }

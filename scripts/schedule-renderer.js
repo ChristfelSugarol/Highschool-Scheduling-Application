@@ -45,7 +45,7 @@ function renderSchedules(data, maptype) {
     data.forEach((item, id) => {
 
         if (!id.includes("PecsonSugarolSirilanKeyword")){
-            html+=`<table style="table-layout:fixed"><colgroup><col width=10%></colgroup><tr><th colspan="6" class="sched_h1">${id}</th></tr><tr class="sched_h2"><td></td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td></tr>`;
+            html+=`<table style="table-layout:fixed"><colgroup><col width=13%></colgroup><tr><th colspan="6" class="sched_h1">${id}</th></tr><tr class="sched_h2"><td></td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td></tr>`;
         
             var timeslots = [];
 
@@ -90,7 +90,7 @@ function renderSchedules(data, maptype) {
                         timeslots[id2] += slot_entry 
                     }
                     else{
-                        timeslots[id2] += `<td data-selected="false" data-slotid='${maptype}${id}${id1}${id2}' data-map='${maptype}' data-item='${id}' data-day='${id1}' data-slot='${id2}' style='padding:0.4rem;' onclick='selectSlot(this)'><table style='padding:0.2rem; border: 0px'><tr style='padding:0.2rem; border: 0px'><td style='padding:0.2rem; border: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>102106</div></td></tr><tr><td style='padding:0rem; border: 0px; margin: 0px'><div style='color: #1a1a1a; padding:0.2rem;  margin: 0px'>102106</div></td></tr></table></td>`
+                        timeslots[id2] += `<td data-selected="false" data-slotid='${maptype}${id}${id1}${id2}' data-map='${maptype}' data-item='${id}' data-day='${id1}' data-slot='${id2}' style='padding:0.4rem;' onclick='selectSlot(this)'><table style='padding:0.2rem; border: 0px'><tr style='padding:0.2rem; border: 0px'><td style='padding:0.2rem; border: 0px'><div class='empty_schedule_cell' style='padding:0.2rem;  margin: 0px'>102106</div></td></tr><tr><td style='padding:0rem; border: 0px; margin: 0px'><div class='empty_schedule_cell' style='padding:0.2rem;  margin: 0px'>102106</div></td></tr></table></td>`
                         
                     }
                 });
