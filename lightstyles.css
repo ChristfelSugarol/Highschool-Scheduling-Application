@@ -41,3 +41,9 @@
 .light-mode .empty_schedule_cell {
     color: whitesmoke;
 }
+
+.light-mode #scheduleGrid .dimmed {
+    background-color: #a1a1a1;
+    color: #7b7b7b;
+    cursor: not-allowed;
+}

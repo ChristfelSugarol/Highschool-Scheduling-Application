@@ -205,6 +205,27 @@ input[type=checkbox]{
     margin-block: 0px;
 }
 
+#scheduleGrid {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px; 
+    overflow: hidden; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+#scheduleGrid th,
+#scheduleGrid td {
+    padding: 8px 12px;
+    text-align: center; 
+    vertical-align: middle; 
+}
+
+#scheduleGrid th {
+    padding: 10px 12px;
+    font-weight: bold;
+}
+
 #scheduleGrid .active {
     background-color: #00d238;
     box-shadow: inset 0 0 10px rgba(0,0,255,0.3);
