@@ -32,6 +32,7 @@ async function openFileSelectionDialog(options = {}) {
     const defaultOptions = {
         initialDirectory: os.homedir(),
         filters: [
+            { name: 'JSON Files', extensions: ['json'] },
             { name: 'All Files', extensions: ['*'] }
         ],
         properties: ['openFile']
@@ -61,7 +62,7 @@ async function openFileSelectionDialog(options = {}) {
                 command = `powershell.exe -Command "Add-Type -AssemblyName System.Windows.Forms; \
                 $filePicker = New-Object System.Windows.Forms.OpenFileDialog; \
                 $filePicker.InitialDirectory = '${defaultOptions.initialDirectory}'; \
-                $filePicker.Filter = 'All Files (*.*)|*.*'; \
+                $filePicker.Filter = 'JSON Files (*.json)|*.json|All Files (*.*)|*.*'; \
                 $filePicker.ShowDialog(); \
                 $filePicker.FileName"`;
                 break;
@@ -143,7 +144,7 @@ async function selectFile() {
                     schedules = new Map();
                     renderTable()
 
-                    active_file = "savedFilePath"
+                    //active_file = "savedFilePath"
                     document.getElementById("filenameDisplay").textContent = active_file.split("\\")[active_file.split("\\").length - 1]
             
                 }
