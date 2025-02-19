@@ -52,7 +52,7 @@ async function openFileSaveDialog(defaultContent = '', options = {}) {
                 $savePicker = New-Object System.Windows.Forms.SaveFileDialog; \
                 $savePicker.InitialDirectory = '${opts.initialDirectory}'; \
                 $savePicker.FileName = '${opts.defaultFileName}'; \
-                $savePicker.Filter = 'All Files (*.*)|*.*'; \
+                $savePicker.Filter = 'JSON Files (*.json)|*.json|All Files (*.*)|*.*'; \
                 $savePicker.ShowDialog(); \
                 $savePicker.FileName"`;
                 break;
