@@ -88,7 +88,7 @@ function runBackEnd(data) {
     
 
     return new Promise((resolve, reject) => {
-        const childPython = spawn('python', ['backend/dist/scheduler/scheduler.py'])
+        const childPython = spawn('backend/scheduler.exe', []);
         let fullOutput = '';
 
         const input_data = readOptionsData(data);
