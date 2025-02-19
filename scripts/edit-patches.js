@@ -36,8 +36,6 @@ function updated_fixed_schedule(){
 }
 
 function reset_form(){
-    show_fixed = false
-
     document.getElementById("name").value = "";
     document.getElementById("id").value = "";
     if (currentTab === 'subjects') {
