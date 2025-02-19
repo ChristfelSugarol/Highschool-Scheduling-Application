@@ -22,6 +22,7 @@
     <script src="scripts/edit-patches.js"></script>
     <script src="scripts/listener.js"></script>
     <script src="scripts/lightmodetoggle.js"></script>
+    <script src="scripts/loading.js"></script>
     
     <link rel="stylesheet" type="text/css" href="styles.css"/>
     <link rel="stylesheet" type="text/css" href="lightstyles.css"/>
@@ -112,11 +113,12 @@
             <h1 id="tabTitle">Teachers</h1>
             <div id="buttonInteractions">
                 <button onclick="addItem()">Add</button>
-                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>
+                <!-- <button onclick="interaction('copy_button')" id="copy_button">Copy</button> -->
                 <button onclick="interaction('edit_button')" id="edit_button">Edit</button>
                 <button onclick="interaction('remove_button')" id="remove_button">Remove</button>
             </div>
         </div>
+        <div id="loadingContainer" style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;"></div>
         <div id="dataTable">
             <!-- Table content will be dynamically inserted here -->
         </div>
@@ -547,7 +549,7 @@
             const tableContainer = document.getElementById('dataTable');
             let html = '';
             let buttonInteractions = document.getElementById('buttonInteractions')
-            var interaction_main = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('copy_button')" id="copy_button">Copy</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
+            var interaction_main = `\n                <button onclick="addItem()">Add</button>\n                <button onclick="interaction('edit_button')" id="edit_button">Edit</button>\n                <button onclick="interaction('remove_button')" id="remove_button">Remove</button>\n `
 
 
             
@@ -602,6 +604,9 @@
                     };
 
                     buttonInteractions.innerHTML = '<button onclick="generate()" id = "generateTimetable">Generate Table</button>'
+
+                    const loading_container = document.getElementById('loadingContainer');
+                    loading_container.innerHTML = ""
                     
                     if (has_schedule == true){
                         buttonInteractions.innerHTML = '<button onclick="export_pdf()" id = "export_button" style="margin: 2px;">Export</button>' + buttonInteractions.innerHTML

@@ -382,7 +382,7 @@ def simulated_hardening(matrix, data, free, filled, groups_empty_space, teachers
     """
     # number of iterations
     # KEYWORD: ITERATION, REPETITION
-    iter_count = 1000
+    iter_count = 10000
     # temperature
     t = 0.5
     _, _, curr_cost_group = empty_space_groups_cost(groups_empty_space)

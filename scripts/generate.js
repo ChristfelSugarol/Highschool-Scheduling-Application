@@ -345,6 +345,7 @@ function printRawData(){
 }
 
 function generate() {
+    start_loading()
     //printRawData()
     convertion()
     export_interaction()
