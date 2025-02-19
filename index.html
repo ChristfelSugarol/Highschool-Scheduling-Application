@@ -757,6 +757,15 @@
         }
 
         function closeModal() {
+            //clean definite schedule
+            clearCells()
+            createTable()
+
+            //close and clean definite schedule
+            if (show_fixed == true){
+                updated_fixed_schedule();
+            }
+
             var modal_block = document.getElementById('addModal')
             modal_block.style.display = 'none';
         }
@@ -782,6 +791,11 @@
                 Array.from(tableState.additionalActiveCells)
                     .filter(cellId => !cellId.endsWith(`-${col}`))
             );
+        }
+
+        function clearCells(){
+            tableState.primaryActiveCells = new Set()
+            tableState.additionalActiveCells = new Set()
         }
 
         function findPrimaryCell(col) {
@@ -1146,6 +1160,7 @@
                 const item = getCurrentTabData().get(document.getElementById("id").value)
                 updateAddData(item);
                 reset_form()
+                clearCells()
                 closeModal();
                 renderTable();
             };
@@ -1265,6 +1280,7 @@
                 console.log(document.getElementById("name"))
                 updateItem(id); // Update item on submission
                 reset_form()
+                clearCells()
             };
         }
 
