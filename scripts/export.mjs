@@ -135,7 +135,8 @@ function export_interaction(){
 function clear_schedule(){
   console.log("Clearing")
   has_schedule = false
-  document.getElementById("dataTable").remove()
+  const table = document.getElementById("dataTable");
+  table.innerHTML = ""
   buttonInteractions.innerHTML = '<button onclick="generate()" id = "generateTimetable">Generate Table</button>'
                      
 }
