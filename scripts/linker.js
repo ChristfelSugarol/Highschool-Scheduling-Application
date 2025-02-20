@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const { app } = require('electron');
 
 var teacher_schedules = new Map();
 var section_schedules = new Map();
@@ -88,7 +89,11 @@ function runBackEnd(data) {
     
 
     return new Promise((resolve, reject) => {
-        const childPython = spawn('python', ['backend/dist/scheduler/scheduler.py'])
+        const asarDirectory = path.dirname(process.resourcesPath);
+        const exePath =  path.join(asarDirectory, 'backend', 'scheduler.exe')
+        
+        console.log(exePath)
+        const childPython = spawn(exePath, []);
         let fullOutput = '';
 
         const input_data = readOptionsData(data);
